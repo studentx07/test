@@ -458,11 +458,12 @@ $("rs").onclick=function(){(async function(){try{var d=await decodeBackupText($(
  rows.forEach(function(r){have[recordKey(r)]=1});
  R.forEach(function(r){if(r&&Number.isFinite(Number(r.ts))&&r.s){r.i=n(r.i);if(r.i2!=null)r.i2=n(r.i2);var key=recordKey(r);if(!have[key]){have[key]=1;rows.push(r);add++}}});
  rows.sort(function(a,b){return b.ts-a.ts});save();
- if(!Array.isArray(d)){var hv={};nts.forEach(function(x){hv[x.ts]=1});(d.notes||[]).forEach(function(x){if(x&&x.ts&&x.x&&!hv[x.ts]){nts.push(x);hv[x.ts]=1}});nts.sort(function(a,b){return b.ts-a.ts});nsv();
-  var q=d.prod||{};try{for(var gk in d.g||{})gbs(gk,+d.g[gk],gk!="a")}catch(e){}
-  (q.tasks||[]).forEach(function(t){if(t&&t.ts&&!P.tasks.some(function(z){return z.ts==t.ts}))P.tasks.push(t)});
-  (q.habits||[]).forEach(function(h){var o=P.habits.filter(function(z){return z.n==h.n})[0];if(o)for(var k in h.d)o.d[k]=1;else P.habits.push(h)});
-  (q.goals||[]).forEach(function(g){if(!P.goals.some(function(z){return z.t==g.t}))P.goals.push(g)});
+ if(!Array.isArray(d)){var hv=Object.create(null);nts.forEach(function(x){hv[String(x.ts)+"|"+String(x.k)+"|"+String(x.x)]=1});(Array.isArray(d.notes)?d.notes:[]).forEach(function(x){var key=x&&String(x.ts)+"|"+String(x.k)+"|"+String(x.x);if(x&&x.ts&&x.x&&!hv[key]){nts.push(x);hv[key]=1}});nts.sort(function(a,b){return b.ts-a.ts});nsv();
+  var q=d.prod&&typeof d.prod==="object"?d.prod:{};try{for(var gk in d.g||{})gbs(gk,+d.g[gk],gk!="a")}catch(e){}
+  function mergeTasks(source,target){(Array.isArray(source)?source:[]).forEach(function(t){if(!t||!t.ts||!t.t)return;var exists=target.some(function(z){return (t.id!=null&&z.id===t.id)||(z.ts===t.ts&&z.t===t.t)});if(!exists)target.push(t)})}
+  mergeTasks(q.tasks,P.tasks);mergeTasks(q.arch,P.arch);
+  (Array.isArray(q.habits)?q.habits:[]).forEach(function(h){if(!h||!h.n)return;var o=P.habits.filter(function(z){return z.n===h.n})[0];if(o){o.d=o.d||{};for(var k in h.d||{})o.d[k]=h.d[k];if(Array.isArray(h.w))o.w=h.w.slice()}else P.habits.push(h)});
+  (Array.isArray(q.goals)?q.goals:[]).forEach(function(g){if(!g||!g.t)return;var existing=P.goals.filter(function(z){return z.t===g.t})[0];if(!existing){P.goals.push(g);return}existing.s=Array.isArray(existing.s)?existing.s:[];(Array.isArray(g.s)?g.s:[]).forEach(function(step){if(step&&!existing.s.some(function(z){return z.s===step.s}))existing.s.push(step)})});
   ["moods","pom"].forEach(function(k){for(var x in q[k]||{})if(!(x in P[k]))P[k][x]=q[k][x]});pv();
   if(d.rec&&!rg())rsv(d.rec);
   (d.cats||[]).forEach(function(x){x=String(x).replace(/['"<>&]/g,"");if(x&&CT.indexOf(x)<0)CT.push(x)});try{localStorage.setItem(CK,JSON.stringify(CT.slice(7)))}catch(e){}rcat();

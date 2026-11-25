@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - feature/sakina-companion-memory
+      - fix/sakina-data-stability
     paths:
       - 'index.html'
       - 'manifest.json'

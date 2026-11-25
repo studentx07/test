@@ -42,6 +42,40 @@ test('statistics editor validates edits and sends deleted records to trash', () 
   assert.match(html, /addToTrash\("feeling",removed,removed\.s\)/);
 });
 
+test('statistics still show productivity when there are no emotion records', () => {
+  const match = html.match(/(function stats\(\)\{[\s\S]*?)\nvar EG=/);
+  assert.ok(match, 'expected statistics renderer');
+  const today = new Date();
+  const todayKey = [today.getFullYear(), today.getMonth(), today.getDate()].join('-');
+  const nodes = { sx: { innerHTML: '' }, sp: {} };
+  const context = {
+    rows: [],
+    sp: 7,
+    window: {
+      P: {
+        tasks: [{ done: Date.now() }],
+        arch: [],
+        pom: { [todayKey]: 2 },
+        moods: { [todayKey]: { m: 4 } },
+        habits: []
+      }
+    },
+    $: id => nodes[id],
+    emos: () => [],
+    emoSection: () => '',
+    esc: String,
+    hbx: () => '',
+    bp() {}
+  };
+
+  vm.runInNewContext(`${match[1]};stats();`, context);
+
+  assert.match(nodes.sx.innerHTML, /<b>0<\/b><span>تسجيل<\/span>/);
+  assert.match(nodes.sx.innerHTML, /<b>1<\/b><span>مهمة منجزة<\/span>/);
+  assert.match(nodes.sx.innerHTML, /<b>2<\/b><span>جلسة تركيز<\/span>/);
+  assert.match(nodes.sx.innerHTML, /<b>4\.0<\/b><span>متوسط المزاج \/5<\/span>/);
+});
+
 test('deletion confirmation uses a separate attribute from task checkbox IDs', () => {
   assert.match(html, /function two\(b,fn\)\{if\(b\.getAttribute\("data-confirm"\)\)/);
   assert.match(html, /data-c='"\+esc\(t\.id\)\+"/);

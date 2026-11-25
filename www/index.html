@@ -533,7 +533,6 @@ function stats(){
  function av(a){return a.length?a.reduce(function(t,r){return t+ +r.i},0)/a.length:0}
  function am(a){return a.reduce(function(t,v){return t+v},0)/a.length}
  var head="<div class='chips' id='sp' style='margin:0 0 12px'>"+[[7,"7 أيام"],[30,"30 يوم"],[0,"الكل"]].map(function(x){return "<button type='button' data-p='"+x[0]+"'"+(x[0]==sp?" class='on'":"")+">"+x[1]+"</button>"}).join("")+"</div>";
- if(!R.length){s.innerHTML=head+"<div class='card em'>"+(rows.length?"مفيش تسجيلات في الفترة دي.":"سجل كام موقف وهتظهر الإحصائيات هنا.")+"</div>";bp();return}
  var cnt={},dc={},cc={},tm={},ta={},ca={},imp=0,ni=0,TB=["الصباح","الظهر والعصر","المساء","الليل"];
  function tod(h){return h>=5&&h<12?0:h>=12&&h<18?1:h>=18&&h<23?2:3}
  R.forEach(function(r){var i=+r.i,t=TB[tod(new Date(r.ts).getHours())];
@@ -541,8 +540,9 @@ function stats(){
   (r.c||[]).forEach(function(x){cc[x]=(cc[x]||0)+1;(ca[x]=ca[x]||[]).push(i)});
   tm[t]=(tm[t]||0)+1;(ta[t]=ta[t]||[]).push(i);if(r.a&&r.i2!=null){imp+=r.i-r.i2;ni++}});
  function worst(o){var b=null,v=-1;Object.keys(o).forEach(function(k){if(o[k].length>=2&&am(o[k])>v){v=am(o[k]);b=k}});return b?[b,v]:null}
- var a=av(R),top=Object.keys(cnt).sort(function(x,y){return cnt[y]-cnt[x]})[0],delta=P2.length?a-av(P2):null;
- var cards="<div class='st'><div><b>"+R.length+"</b><span>تسجيل</span></div><div><b>"+a.toFixed(1)+"</b><span>متوسط الشدة"+(delta==null?"":delta<-0.2?" ↓":delta>0.2?" ↑":"")+"</span></div><div><b>"+esc(top||"-")+"</b><span>أكتر شعور</span></div></div>";
+ var a=av(R),top=Object.keys(cnt).sort(function(x,y){return cnt[y]-cnt[x]})[0],delta=R.length&&P2.length?a-av(P2):null;
+ var cards="<div class='st'><div><b>"+R.length+"</b><span>تسجيل</span></div><div><b>"+(R.length?a.toFixed(1):"—")+"</b><span>متوسط الشدة"+(delta==null?"":delta<-0.2?" ↓":delta>0.2?" ↑":"")+"</span></div><div><b>"+esc(top||"-")+"</b><span>أكتر شعور</span></div></div>";
+ var emptyEmotions=R.length?"":"<div class='card em'>"+(rows.length?"مفيش تسجيلات في الفترة دي.":"سجل كام موقف وهتظهر إحصائيات المشاعر هنا.")+"</div>";
  var ins=[],w1=worst(ta),w2=worst(ca);
  if(delta!=null&&Math.abs(delta)>=0.3)ins.push(delta<0?"متوسط الشدة قل "+Math.abs(delta).toFixed(1)+" عن الفترة اللي قبلها 👏":"متوسط الشدة زاد "+delta.toFixed(1)+" عن الفترة اللي قبلها، خد بالك من نفسك.");
  if(w1)ins.push("أعلى شدة غالبًا في وقت: "+w1[0]+" (متوسط "+w1[1].toFixed(1)+").");
@@ -561,7 +561,7 @@ function stats(){
  R.forEach(function(r){var w=WN[new Date(r.ts).getDay()];wd[w]=(wd[w]||0)+1;emos(r).forEach(function(x){(ea[x]=ea[x]||[]).push(+r.i)})});
  Object.keys(ea).forEach(function(k){if(ea[k].length>=2)ei[k]=+am(ea[k]).toFixed(1)});
  var ex1="<div class='st'><div><b>"+dn+"</b><span>مهمة منجزة</span></div><div><b>"+fc+"</b><span>جلسة تركيز</span></div><div><b>"+(mv.length?am(mv).toFixed(1):"-")+"</b><span>متوسط المزاج /5</span></div></div>",ex2=sec("أيام الأسبوع",wd)+sec("الأعلى شدة حسب الشعور",ei)+sec("إنجاز العادات",hc);
- s.innerHTML=head+cards+ex1+(ins.length?"<div class='card' style='background:var(--ac2)'>"+ins.map(function(x){return "<div>• "+x+"</div>"}).join("")+"</div>":"")+tr+emoSection(R)+sec("المجالات",cc)+sec("أنماط التفكير",dc)+sec("وقت اليوم",tm)+ex2;bp()}
+ s.innerHTML=head+cards+emptyEmotions+ex1+(ins.length?"<div class='card' style='background:var(--ac2)'>"+ins.map(function(x){return "<div>• "+x+"</div>"}).join("")+"</div>":"")+tr+emoSection(R)+sec("المجالات",cc)+sec("أنماط التفكير",dc)+sec("وقت اليوم",tm)+ex2;bp()}
 var EG=[["قلق وخوف",["قلق","توتر","خوف","ارتباك"]],["حزن وانكسار",["حزن","وحدة","خيبة أمل","إحباط","ملل"]],["غضب ولوم",["غضب","غيرة","ذنب","خجل"]],["مشاعر إيجابية",["فرح","هدوء","فخر","امتنان","حب"]]];
 $("ce").className="";
 $("ce").innerHTML=EG.map(function(g){return "<div style='color:var(--mu);font-size:.82rem;margin-top:8px'>"+g[0]+"</div><div class='chips' style='margin-top:4px'>"+g[1].map(function(x){return "<button type='button' data-v='"+x+"'>"+(EJ[x]?EJ[x]+" ":"")+x+"</button>"}).join("")+"</div>"}).join("");

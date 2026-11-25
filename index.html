@@ -792,7 +792,7 @@ function chatRender(){
  }
  box.scrollTop=box.scrollHeight;
 }
-function mergeChatSessions(incoming){var known={};chatSessions.forEach(function(c){known[c.id]=c});incoming.forEach(function(c){if(!c||!c.id||!Array.isArray(c.messages))return;if(!known[c.id]){chatSessions.push(c);known[c.id]=c}else{var seen={};known[c.id].messages.forEach(function(m){seen[m.id]=1});c.messages.forEach(function(m){if(m&&m.id&&!seen[m.id])known[c.id].messages.push(m)})}}});chatSave();chatRender()}
+function mergeChatSessions(incoming){var known={};chatSessions.forEach(function(c){known[c.id]=c});incoming.forEach(function(c){if(!c||!c.id||!Array.isArray(c.messages))return;var target=known[c.id];if(!target){chatSessions.push(c);known[c.id]=c;return}var seen={};target.messages.forEach(function(m){if(m&&m.id)seen[m.id]=1});c.messages.forEach(function(m){if(m&&m.id&&!seen[m.id]){target.messages.push(m);seen[m.id]=1}})});chatSave();chatRender()}
 $("chatNew").onclick=function(){var c={id:chatId(),createdAt:Date.now(),updatedAt:Date.now(),messages:[]};chatSessions.unshift(c);activeChatId=c.id;chatSave();chatRender();$("chatInput").focus()};
 $("chatForm").onsubmit=function(e){e.preventDefault();var v=$("chatInput").value.trim();if(!v)return;chatEnsure();var c=chatSessions.find(function(x){return x.id===activeChatId});c.messages.push({id:chatId(),role:"user",text:v,ts:Date.now()});c.updatedAt=Date.now();$("chatInput").value="";if(chatSave()){hlog("chat","رسالة جديدة","تم حفظ رسالة في محادثة سكينة");chatRender()}};
 $("chatSessions").onclick=function(e){var b=e.target.closest("[data-chat-open]");if(!b)return;activeChatId=b.getAttribute("data-chat-open");chatRender()};

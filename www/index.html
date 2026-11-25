@@ -152,6 +152,26 @@ button[disabled]{opacity:.4;pointer-events:none}
 .cl{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 #tb tr[data-r]:hover{background:var(--ac2)}
 @keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+#chat .chat-layout{display:grid;grid-template-columns:1fr;gap:12px}
+#chat .chat-toolbar{display:flex;gap:8px;flex-wrap:wrap}
+#chat .chat-toolbar button{font-size:.88rem;padding:7px 11px}
+#chat .chat-list{display:flex;gap:7px;overflow-x:auto;padding:4px 2px 10px}
+#chat .chat-list button{white-space:nowrap;max-width:190px;overflow:hidden;text-overflow:ellipsis;background:var(--ac2);color:var(--tx);box-shadow:none;font-size:.82rem}
+#chat .chat-list button.on{background:var(--ac);color:white}
+#chat .chat-messages{min-height:190px;max-height:48vh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:8px;background:var(--bg);border-radius:16px}
+#chat .chat-msg{max-width:88%;padding:10px 13px;border-radius:16px;background:var(--sf);border:1px solid var(--bd);white-space:pre-wrap;overflow-wrap:anywhere}
+#chat .chat-msg.user{align-self:flex-start;background:var(--ac2);border-color:transparent}
+#chat .chat-msg .meta{font-size:.72rem;color:var(--mu);margin-top:5px}
+#chat .chat-msg button{font-size:.72rem;padding:2px 7px;margin-top:5px;box-shadow:none}
+#chat .chat-empty{margin:auto;text-align:center;color:var(--mu);padding:25px 10px}
+#chat .chat-results{display:grid;gap:7px}
+#chat .chat-result{background:var(--bg);border-radius:12px;padding:10px;text-align:right;box-shadow:none;color:var(--tx);border:1px solid var(--bd)}
+#chat .chat-result small{display:block;color:var(--mu)}
+#chat .chat-compose{display:flex;gap:8px;align-items:flex-end}
+#chat .chat-compose textarea{min-height:48px;max-height:140px;margin:0;flex:1}
+#chat .chat-compose button{min-height:48px}
+@media(min-width:600px){#chat .chat-layout{grid-template-columns:minmax(0,1fr) 190px}#chat .chat-list{display:flex;flex-direction:column;max-height:360px;overflow:auto}#chat .chat-messages{max-height:55vh}}
 </style>
 </head>
 <body>
@@ -205,6 +225,46 @@ button[disabled]{opacity:.4;pointer-events:none}
 <section id="th"><div class="card"><h2>الألوان</h2><div id="sk2" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div></div><div class="card"><h2>الخلفية</h2><div class="chips" id="pt2"></div></div><div class="card"><h2>الوضع</h2><div class="chips" id="md"><button type="button" data-v="auto">📱 تلقائي</button><button type="button" data-v="light">☀️ فاتح</button><button type="button" data-v="dark">🌙 داكن</button></div></div></section>
 <section id="cal"><div class="card"><div class="row" style="justify-content:space-between"><button type="button" class="g" id="calprev" aria-label="الشهر السابق">‹</button><h2 id="calmonth" style="margin:0;text-align:center;flex:1">التقويم</h2><button type="button" class="g" id="calnext" aria-label="الشهر التالي">›</button></div><div class="calendar-weekdays" aria-hidden="true"><span>أحد</span><span>اثنين</span><span>ثلاثاء</span><span>أربعاء</span><span>خميس</span><span>جمعة</span><span>سبت</span></div><div id="calgrid" class="calendar-grid"></div><p class="sub">النقاط توضح الأيام التي تحتوي على تسجيلات أو إنجازات أو مزاج مسجل.</p></div><div class="card" id="caldetail"></div></section>
 <section id="trash"><div class="card"><div class="row" style="justify-content:space-between;flex-wrap:wrap"><div><h2>🗑️ سلة المحذوفات</h2><p class="sub" style="margin:0">تُحفظ العناصر هنا لمدة 30 يومًا، ويمكن استعادتها قبل الحذف النهائي.</p></div><button type="button" class="d" id="trashEmpty">إفراغ السلة</button></div><div id="trashlist" style="margin-top:12px"></div></div></section>
+<section id="chat"><div class="card">
+<h2>سكينة — مساحة الكلام</h2>
+<p class="sub">اكتب براحتك. رسائلك تُحفظ على هذا الجهاز تلقائيًا، وتقدر ترجع لها وتبحث فيها.</p>
+<div class="card" style="background:var(--ac2);border:0;box-shadow:none">
+<b>اتصال سكينة الذكي — إعداد اختياري</b>
+<p style="margin:4px 0 8px;font-size:.9rem">المحادثات تظل محفوظة على جهازك. عند تفعيل الإرسال، الرسائل المختارة تذهب إلى خادم الذكاء الاصطناعي الذي تثق به. لا تضع مفتاح مزود الذكاء الاصطناعي هنا؛ المطلوب رابط الخادم ورمز وصول منفصل فقط.</p>
+<label for="chatEndpoint">رابط خادم سكينة</label>
+<input id="chatEndpoint" type="url" inputmode="url" placeholder="https://your-worker.example.workers.dev">
+<label for="chatAccessToken">رمز الوصول للخادم</label>
+<input id="chatAccessToken" type="password" autocomplete="off" placeholder="رمز الوصول الذي أعدّه مسؤول الخادم">
+<div class="row" style="margin-top:8px"><button type="button" id="chatConnect">حفظ إعداد الاتصال</button><button type="button" class="g" id="chatDisconnect">فصل الاتصال</button></div>
+<label style="display:flex;gap:8px;align-items:flex-start;margin-top:12px"><input id="chatAiConsent" type="checkbox" style="width:auto;margin-top:6px"> أوافق على إرسال رسائل هذه المحادثة إلى خادم الذكاء الاصطناعي للرد عليها.</label>
+<label style="display:flex;gap:8px;align-items:flex-start;margin-top:8px"><input id="chatUseHistory" type="checkbox" style="width:auto;margin-top:6px"> أسمح بإرسال مقتطفات مرتبطة من محادثاتي الأخرى أيضًا (اختياري، ومغلق افتراضيًا).</label>
+<p id="chatAiStatus" class="sub" role="status" aria-live="polite" style="font-size:.82rem;margin:8px 0 0">الاتصال غير مُعدّ. الرسائل ستُحفظ محليًا فقط.</p>
+</div>
+<div class="chat-toolbar" style="margin-bottom:10px">
+<button type="button" id="chatNew">＋ محادثة جديدة</button>
+<button type="button" class="g" id="chatExport">تصدير المحادثات</button>
+<button type="button" class="d" id="chatClear">حذف كل المحادثات</button>
+</div>
+<label for="chatSearch">البحث في كل المحادثات</label>
+<input id="chatSearch" type="search" placeholder="اكتب كلمة أو جملة للبحث…">
+<div id="chatSearchResults" class="chat-results" style="margin:10px 0"></div>
+<div class="chat-layout">
+<div>
+<div id="chatMessages" class="chat-messages" aria-live="polite"></div>
+<form id="chatForm" style="margin-top:10px">
+<div class="chat-compose">
+<textarea id="chatInput" maxlength="12000" placeholder="اكتب اللي في بالك…" required></textarea>
+<button type="submit">إرسال</button>
+</div>
+</form>
+<p class="sub" style="font-size:.78rem;margin:8px 0 0">الرسائل خاصة بهذا المتصفح والجهاز ما لم تصدّرها بنفسك. مسح بيانات المتصفح قد يمسحها.</p>
+</div>
+<div>
+<b>محادثاتك</b>
+<div id="chatSessions" class="chat-list"></div>
+</div>
+</div>
+</div></section>
 <section id="hist"><div class="card"><h2>📜 سجل التغييرات</h2><p class="sub">آخر التغييرات التي تمت داخل التطبيق على هذا الجهاز.</p><div class="row"><button type="button" class="g" id="hc">نسخ السجل</button><button type="button" class="d" id="hx">مسح السجل</button></div><div id="hlg" style="margin-top:12px"></div></div></section>
 </main>
 <div id="lk" ><h1>🔒 سكينة</h1><input id="pn" aria-label="الرقم السري" type="password" inputmode="numeric" placeholder="الرقم السري" style="max-width:240px;text-align:center"><div style="margin-top:12px"><button id="pb">فتح</button></div></div>
@@ -219,15 +279,15 @@ button[disabled]{opacity:.4;pointer-events:none}
     </div>
   </div>
 </div>
-<div id="mn"><button data-g="w">📝 كتابة حرة وامتنان</button><button data-g="gl">🎯 الأهداف</button><button data-g="wv">📈 المراجعة الأسبوعية</button><button data-g="gm">🧩 ألعاب ذكاء</button><button data-g="cal">🗓️ التقويم</button><button data-g="trash">🗑️ سلة المحذوفات</button><button data-g="hist">📜 سجل التغييرات</button><button data-g="r">🌱 التعافي</button><button data-g="e">🌬️ تنفّس</button><button data-g="d">💾 نسخ احتياطي وقفل</button><button data-g="th">🎨 المظهر والألوان</button></div>
+<div id="mn"><button data-g="w">📝 كتابة حرة وامتنان</button><button data-g="gl">🎯 الأهداف</button><button data-g="wv">📈 المراجعة الأسبوعية</button><button data-g="gm">🧩 ألعاب ذكاء</button><button data-g="cal">🗓️ التقويم</button><button data-g="trash">🗑️ سلة المحذوفات</button><button data-g="hist">📜 سجل التغييرات</button><button data-g="chat">💬 محادثة سكينة</button><button data-g="r">🌱 التعافي</button><button data-g="e">🌬️ تنفّس</button><button data-g="d">💾 نسخ احتياطي وقفل</button><button data-g="th">🎨 المظهر والألوان</button></div>
 <div id="bn" role="navigation" aria-label="التنقل الرئيسي"><button data-g="td" class="on">🏠<span>اليوم</span></button><button data-g="a">✏️<span>تسجيل</span></button><button data-g="b">📋<span>الجدول</span></button><button data-g="c">📊<span>إحصائيات</span></button><button data-g="m">☰<span>المزيد</span></button></div>
 <div class="toast" id="to" role="status" aria-live="polite"></div>
 <script>
 var K="mashaeri_v1",rows=[],EM=["قلق","حزن","غضب","خوف","ذنب","خجل","إحباط","وحدة","توتر","غيرة","ملل","ارتباك","خيبة أمل","فرح","هدوء","فخر","امتنان","حب"],
 DS=["كل شيء أو لا شيء","قراءة أفكار","توقع الأسوأ","تعميم","لوم النفس","لازم وينبغي"],se=[],sd=[],CT=["شغل","أسرة","علاقات","صحة","مال","دراسة","نفس"],sc=[];
-try{rows=JSON.parse(localStorage.getItem(K)||"[]")}catch(e){rows=[]}
+try{var storedRows=JSON.parse(localStorage.getItem(K)||"[]");rows=Array.isArray(storedRows)?storedRows.filter(function(r){return r&&typeof r==="object"&&!Array.isArray(r)&&Number.isFinite(Number(r.ts))}).map(function(r){return Object.assign({},r,{ts:Number(r.ts),s:String(r.s||""),t:String(r.t||""),m:String(r.m||""),i:String(Math.max(0,Math.min(10,Number(r.i)||0))),d:Array.isArray(r.d)?r.d:[],c:Array.isArray(r.c)?r.c:[],a:String(r.a||"")})}):[]}catch(e){rows=[]}
 var $=function(x){return document.getElementById(x)};
-function save(){try{localStorage.setItem(K,JSON.stringify(rows))}catch(e){toast("تعذر الحفظ على الجهاز، انسخ نسخة احتياطية")}}
+function save(){try{localStorage.setItem(K,JSON.stringify(rows));return true}catch(e){toast("تعذر الحفظ على الجهاز. احتفظ بالبيانات وصدّر نسخة احتياطية بعد توفير مساحة.");return false}}
 function esc(s){var d=document.createElement("div");d.textContent=s==null?"":s;return d.innerHTML}
 function toast(m){var t=$("to");t.textContent=m;t.className="toast on";setTimeout(function(){t.className="toast"},1600)}
 function fmt(ts){return new Date(ts).toLocaleString("ar-EG",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"})}
@@ -251,7 +311,7 @@ function hlog(type,action,detail){
 }
 var TRASH_KEY="sakina_trash_v1",trashItems=[];
 try{trashItems=JSON.parse(localStorage.getItem(TRASH_KEY)||"[]");if(!Array.isArray(trashItems))trashItems=[]}catch(e){trashItems=[]}
-function persistTrash(){try{localStorage.setItem(TRASH_KEY,JSON.stringify(trashItems))}catch(e){toast("تعذر حفظ سلة المحذوفات؛ صدّر نسخة احتياطية")}}
+function persistTrash(){try{localStorage.setItem(TRASH_KEY,JSON.stringify(trashItems));return true}catch(e){toast("تعذر حفظ سلة المحذوفات؛ صدّر نسخة احتياطية");return false}}
 function freshId(prefix){return prefix+"-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,9)}
 function addToTrash(type,item,label){if(item==null)return;var copy;try{copy=JSON.parse(JSON.stringify(item))}catch(e){copy=item}trashItems.unshift({id:freshId("trash"),type:type,item:copy,label:String(label||"عنصر"),deletedAt:Date.now()});if(trashItems.length>500)trashItems.length=500;persistTrash();hlog("trash","نقل إلى السلة",String(label||"عنصر"))}
 function hdraw(){
@@ -319,8 +379,8 @@ function openStatsEditor(index){
       if(!situation||!thought||!emotions.length){toast("املأ الموقف والفكرة وشعورًا واحدًا على الأقل");return false}
       if(!intensityValue||!Number.isInteger(intensity)||intensity<0||intensity>10){toast("شدة الشعور يجب أن تكون من 0 إلى 10");return false}
       if(alternative&&(!afterValue||!Number.isInteger(after)||after<0||after>10)){toast("الشدة بعد الفكرة البديلة يجب أن تكون من 0 إلى 10");return false}
-      r.s=situation;r.t=thought;r.m=emotions.join("، ");r.i=String(intensity);r.a=alternative;r.i2=alternative?String(after):null;
-      save();hlog("emotion","تعديل من الإحصائيات","الموقف: "+r.s+" | الشعور: "+r.m);draw();stats();toast("تم تحديث التسجيل");
+      var previous=Object.assign({},r);r.s=situation;r.t=thought;r.m=emotions.join("، ");r.i=String(intensity);r.a=alternative;r.i2=alternative?String(after):null;
+      if(!save()){rows[index]=previous;return false}hlog("emotion","تعديل من الإحصائيات","الموقف: "+r.s+" | الشعور: "+r.m);draw();stats();toast("تم تحديث التسجيل");
       return true;
     });
 }
@@ -333,9 +393,9 @@ $("sx").onclick=function(e){
   two(button,function(){
     index=statsRecordIndex(button.getAttribute("data-esd"));
     if(index<0)return;
-    var removed=rows[index];
+    var removed=rows[index];rows.splice(index,1);if(!save()){rows.splice(index,0,removed);return}
     if(removed)addToTrash("feeling",removed,removed.s);
-    rows.splice(index,1);save();hlog("emotion","حذف من الإحصائيات",removed.s);draw();stats();toast("تم نقل التسجيل إلى سلة المحذوفات");
+    hlog("emotion","حذف من الإحصائيات",removed.s);draw();stats();toast("تم نقل التسجيل إلى سلة المحذوفات");
   });
 };
 // ============ دالة رسم الجدول ============
@@ -359,10 +419,11 @@ $("f").onsubmit=function(e){e.preventDefault();
  var all=se.concat($("m").value.split(/[،,]/).map(function(x){return x.trim()}).filter(Boolean));
  if(!all.length){toast("اختار شعور واحد على الأقل");return}
  var a=$("al").value.trim();
- var o={ts:ed!=null&&rows[ed]?rows[ed].ts:Date.now(),s:$("s").value.trim(),t:$("t").value.trim(),m:all.join("، "),i:$("i").value,d:sd.slice(),c:sc.slice(),a:a,i2:a?$("i2").value:null};
- if(ed!=null&&rows[ed])rows[ed]=o;else rows.unshift(o);
- save();resetForm();toast("تم الحفظ، "+CL[Math.floor(Math.random()*CL.length)]);draw();
- hlog("emotion",ed!=null?"تعديل":"إضافة","الموقف: "+o.s+" | الشعور: "+o.m);
+ var wasEdit=ed!=null&&!!rows[ed],oldRecord=wasEdit?rows[ed]:null,o={ts:wasEdit?rows[ed].ts:Date.now(),s:$("s").value.trim(),t:$("t").value.trim(),m:all.join("، "),i:$("i").value,d:sd.slice(),c:sc.slice(),a:a,i2:a?$("i2").value:null};
+ if(wasEdit)rows[ed]=o;else rows.unshift(o);
+ if(!save()){if(wasEdit)rows[ed]=oldRecord;else rows.shift();return}
+ resetForm();toast("تم الحفظ، "+CL[Math.floor(Math.random()*CL.length)]);draw();
+ hlog("emotion",wasEdit?"تعديل":"إضافة","الموقف: "+o.s+" | الشعور: "+o.m);
 };
 var ed=null;
 function resetForm(){ed=null;$("f").reset();se.length=0;sd.length=0;sc.length=0;hint();[].forEach.call(document.querySelectorAll("#ce button,#cd button,#cc button"),function(x){x.className=""});$("iv").textContent="5";$("i2v").textContent="5";$("sv").textContent="حفظ في الجدول";$("cn").style.display="none"}
@@ -374,13 +435,13 @@ function edit(k){var r=rows[k];if(!r)return;resetForm();ed=k;$("s").value=r.s;$(
  $("i").value=r.i;$("iv").textContent=r.i;$("al").value=r.a||"";var v2=r.i2!=null?r.i2:r.i;$("i2").value=v2;$("i2v").textContent=v2;
  $("sv").textContent="حفظ التعديل";$("cn").style.display="";document.querySelector("#nv button").click();window.scrollTo(0,0)}
 $("tb").onclick=function(e){if(!e.target.closest("button")){var t2=e.target.closest("tr[data-r]");if(t2)dopen(+t2.getAttribute("data-r"));return}var b=e.target,k=b.getAttribute("data-k"),w=b.getAttribute("data-e");
- if(k!==null){if(b.getAttribute("data-confirm")){var rec=rows[+k];if(rec)addToTrash("feeling",rec,rec.s);rows.splice(+k,1);save();if(ed!==null)resetForm();draw();toast("تم الحذف")}else{b.setAttribute("data-confirm","1");b.textContent="تأكيد؟";setTimeout(function(){if(b.parentNode){b.removeAttribute("data-confirm");b.textContent="حذف"}},3000)}}
+ if(k!==null){if(b.getAttribute("data-confirm")){var rec=rows[+k];rows.splice(+k,1);if(!save()){rows.splice(+k,0,rec);return}if(rec)addToTrash("feeling",rec,rec.s);if(ed!==null)resetForm();draw();toast("تم الحذف")}else{b.setAttribute("data-confirm","1");b.textContent="تأكيد؟";setTimeout(function(){if(b.parentNode){b.removeAttribute("data-confirm");b.textContent="حذف"}},3000)}}
  else if(w!==null)edit(+w);else if(b.getAttribute("data-p")!==null)cp(rtxt(rows[+b.getAttribute("data-p")]))};
 function cp(t){if(!t){toast("مفيش بيانات");return}
  function fb(){var a=document.createElement("textarea");a.value=t;a.style.cssText="position:fixed;opacity:0";document.body.appendChild(a);a.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}document.body.removeChild(a);
   if(ok)toast("تم النسخ");else{document.querySelectorAll("#nv button")[3].click();$("bk").value=t;$("bk").select();toast("انسخ النص من الخانة يدويًا")}}
  try{navigator.clipboard.writeText(t).then(function(){toast("تم النسخ")},fb)}catch(e){fb()}}
-function makeBackupData(){return {app:"sakina",version:3,createdAt:Date.now(),rows:rows,notes:nts,prod:P,rec:rg(),cats:CT.slice(7),g:GB,trash:trashItems,h:H}}
+function makeBackupData(){return {app:"sakina",version:4,createdAt:Date.now(),rows:rows,notes:nts,prod:P,rec:rg(),cats:CT.slice(7),g:GB,trash:trashItems,h:H,chats:chatSessions}}
 function toBase64(bytes){var s="";for(var i=0;i<bytes.length;i++)s+=String.fromCharCode(bytes[i]);return btoa(s)}
 function fromBase64(s){var raw=atob(s),a=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)a[i]=raw.charCodeAt(i);return a}
 async function deriveBackupKey(password,salt){var material=await crypto.subtle.importKey("raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:250000,hash:"SHA-256"},material,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
@@ -392,20 +453,23 @@ function rtxt(r){var l=["📅 التاريخ: "+fmt(r.ts),"📍 الموقف: "+
  if(r.d&&r.d.length)l.push("🧩 نمط التفكير: "+r.d.join("، "));if(r.a)l.push("🔄 الفكرة البديلة: "+r.a);return l.join("\n")}
 $("ct").onclick=function(){cp(rows.length?rows.map(function(r){return rtxt(r)}).join("\n\n──────────\n\n"):"")};
 $("rs").onclick=function(){(async function(){try{var d=await decodeBackupText($("bk").value),R=Array.isArray(d)?d:d.rows;if(!Array.isArray(R))throw 0;
- var n=function(v){v=+v;return isNaN(v)?0:Math.min(10,Math.max(0,v))},have={},add=0;rows.forEach(function(r){have[r.ts]=1});
- R.forEach(function(r){if(r&&r.ts&&r.s&&!have[r.ts]){r.i=n(r.i);if(r.i2!=null)r.i2=n(r.i2);have[r.ts]=1;rows.push(r);add++}});
- rows.sort(function(a,b){return b.ts-a.ts});save();
- if(!Array.isArray(d)){var hv={};nts.forEach(function(x){hv[x.ts]=1});(d.notes||[]).forEach(function(x){if(x&&x.ts&&x.x&&!hv[x.ts]){nts.push(x);hv[x.ts]=1}});nts.sort(function(a,b){return b.ts-a.ts});nsv();
-  var q=d.prod||{};try{for(var gk in d.g||{})gbs(gk,+d.g[gk],gk!="a")}catch(e){}
-  (q.tasks||[]).forEach(function(t){if(t&&t.ts&&!P.tasks.some(function(z){return z.ts==t.ts}))P.tasks.push(t)});
-  (q.habits||[]).forEach(function(h){var o=P.habits.filter(function(z){return z.n==h.n})[0];if(o)for(var k in h.d)o.d[k]=1;else P.habits.push(h)});
-  (q.goals||[]).forEach(function(g){if(!P.goals.some(function(z){return z.t==g.t}))P.goals.push(g)});
+ var originalRows=rows.slice(),n=function(v){v=+v;return isNaN(v)?0:Math.min(10,Math.max(0,v))},have=Object.create(null),add=0;
+ function recordKey(r){return JSON.stringify([Number(r.ts)||0,String(r.s||""),String(r.t||""),String(r.m||""),String(r.i==null?"":r.i),String(r.a||""),String(r.i2==null?"":r.i2)])}
+ rows.forEach(function(r){have[recordKey(r)]=1});
+ R.forEach(function(r){if(r&&Number.isFinite(Number(r.ts))&&r.s){r.i=n(r.i);if(r.i2!=null)r.i2=n(r.i2);var key=recordKey(r);if(!have[key]){have[key]=1;rows.push(r);add++}}});
+ rows.sort(function(a,b){return b.ts-a.ts});if(!save()){rows=originalRows;throw new Error("تعذر حفظ التسجيلات المسترجعة؛ لم يكتمل الاسترجاع")}
+ if(!Array.isArray(d)){var hv=Object.create(null);nts.forEach(function(x){hv[String(x.ts)+"|"+String(x.k)+"|"+String(x.x)]=1});(Array.isArray(d.notes)?d.notes:[]).forEach(function(x){var key=x&&String(x.ts)+"|"+String(x.k)+"|"+String(x.x);if(x&&x.ts&&x.x&&!hv[key]){nts.push(x);hv[key]=1}});nts.sort(function(a,b){return b.ts-a.ts});nsv();
+  var q=d.prod&&typeof d.prod==="object"?d.prod:{};try{for(var gk in d.g||{})gbs(gk,+d.g[gk],gk!="a")}catch(e){}
+  function mergeTasks(source,target){(Array.isArray(source)?source:[]).forEach(function(t){if(!t||!t.ts||!t.t)return;var exists=target.some(function(z){return (t.id!=null&&z.id===t.id)||(z.ts===t.ts&&z.t===t.t)});if(!exists)target.push(t)})}
+  mergeTasks(q.tasks,P.tasks);mergeTasks(q.arch,P.arch);
+  (Array.isArray(q.habits)?q.habits:[]).forEach(function(h){if(!h||!h.n)return;var o=P.habits.filter(function(z){return z.n===h.n})[0];if(o){o.d=o.d||{};for(var k in h.d||{})o.d[k]=h.d[k];if(Array.isArray(h.w))o.w=h.w.slice()}else P.habits.push(h)});
+  (Array.isArray(q.goals)?q.goals:[]).forEach(function(g){if(!g||!g.t)return;var existing=P.goals.filter(function(z){return z.t===g.t})[0];if(!existing){P.goals.push(g);return}existing.s=Array.isArray(existing.s)?existing.s:[];(Array.isArray(g.s)?g.s:[]).forEach(function(step){if(step&&!existing.s.some(function(z){return z.s===step.s}))existing.s.push(step)})});
   ["moods","pom"].forEach(function(k){for(var x in q[k]||{})if(!(x in P[k]))P[k][x]=q[k][x]});pv();
   if(d.rec&&!rg())rsv(d.rec);
   (d.cats||[]).forEach(function(x){x=String(x).replace(/['"<>&]/g,"");if(x&&CT.indexOf(x)<0)CT.push(x)});try{localStorage.setItem(CK,JSON.stringify(CT.slice(7)))}catch(e){}rcat();
   var seenTrash=Object.create(null);trashItems.forEach(function(x){seenTrash[x.id]=1});(d.trash||[]).forEach(function(x){if(x&&x.id&&!seenTrash[x.id]){trashItems.push(x);seenTrash[x.id]=1}});persistTrash();
   var seenHistory=Object.create(null);H.forEach(function(x){seenHistory[String(x.ts)+"|"+x.type+"|"+x.action+"|"+x.detail]=1});(d.h||d.activity||[]).forEach(function(x){if(!x||!x.ts)return;var record={ts:x.ts,type:x.type||"activity",action:x.action||x.type||"تغيير",detail:x.detail||""},k=String(record.ts)+"|"+record.type+"|"+record.action+"|"+record.detail;if(!seenHistory[k]){H.push(record);seenHistory[k]=1}});H=H.slice(0,500);hsave()}
- draw();ndraw();rq();tr();hr();gr();drawTrash();$("bk").value="";toast("تم دمج النسخة الاحتياطية؛ عناصر جديدة: "+add)}catch(e){toast(e&&e.message&&e.message.indexOf("كلمة مرور")===0?e.message:"النسخة غير صالحة أو كلمة المرور غير صحيحة")}})()};
+ draw();ndraw();rq();tr();hr();gr();drawTrash();if(Array.isArray(d.chats))mergeChatSessions(d.chats);$("bk").value="";toast("تم دمج النسخة الاحتياطية؛ عناصر جديدة: "+add)}catch(e){toast(e&&e.message&&e.message.indexOf("كلمة مرور")===0?e.message:"النسخة غير صالحة أو كلمة المرور غير صحيحة")}})()};
 function bkn(){var e=$("bkn"),l=0;if(window.stoff){e.style.display="";e.textContent="⚠️ المتصفح مش بيحفظ البيانات في الوضع ده، فأي حاجة تكتبها ممكن تضيع. خد نسخة احتياطية بعد كل مرة.";return}try{l=+localStorage.getItem("mashaeri_lastbk")||0}catch(x){}var dd=Math.floor((Date.now()-l)/864e5);if((rows.length||nts.length)&&dd>=7){e.style.display="";e.textContent="💾 "+(l?"آخر نسخة احتياطية من "+dd+" يوم":"لسه ماخدتش نسخة احتياطية")+". خد نسخة من المزيد ← نسخ احتياطي."}else e.style.display="none"}
 function dk(t){var d=new Date(t);return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate()}
 function skr(){var s={},n=0,tc=0,d=new Date();rows.forEach(function(r){s[dk(r.ts)]=1;if(dk(r.ts)==dk(Date.now()))tc++});
@@ -433,7 +497,7 @@ $("pr").onclick=function(){try{localStorage.removeItem(PK);toast("تم إلغا�
 function two(b,fn){if(b.getAttribute("data-confirm")){fn()}else{var t=b.textContent;b.setAttribute("data-confirm","1");b.textContent="تأكيد؟";setTimeout(function(){if(b.parentNode){b.removeAttribute("data-confirm");b.textContent=t}},3000)}}
 var NK="mashaeri_notes",nts=[],wty="تفريغ",WT=["تفريغ","خيال","فكرة","امتنان"],WE={"تفريغ":"🌊 ","خيال":"✨ ","فكرة":"💡 ","امتنان":"🙏 "};
 try{nts=JSON.parse(localStorage.getItem(NK)||"[]")}catch(e){nts=[]}
-function nsv(){try{localStorage.setItem(NK,JSON.stringify(nts))}catch(e){toast("تعذر الحفظ")}}
+function nsv(){try{localStorage.setItem(NK,JSON.stringify(nts));return true}catch(e){toast("تعذر الحفظ");return false}}
 $("wt").innerHTML=WT.map(function(x,i){return "<button type='button' data-v='"+x+"'"+(i?"":" class='on'")+">"+WE[x]+x+"</button>"}).join("");
 $("wt").onclick=function(e){var b=e.target.closest("button");if(!b)return;wty=b.getAttribute("data-v");[].forEach.call($("wt").children,function(x){x.className=x==b?"on":""})};
 $("wk").innerHTML="<option value=''>الكل</option>"+WT.map(function(x){return "<option>"+x+"</option>"}).join("");
@@ -465,7 +529,7 @@ var sp=7;
 function hbx(o){var ks=Object.keys(o).sort(function(a,b){return o[b]-o[a]}).slice(0,6),m=o[ks[0]]||1;return ks.map(function(k){return "<div class='hb'><span style='width:92px'>"+esc(k)+"</span><i style='width:"+Math.round(o[k]/m*50)+"%'></i><em>"+o[k]+"</em></div>"}).join("")}
 function bp(){$("sp").onclick=function(e){var b=e.target.closest("button");if(!b)return;sp=+b.getAttribute("data-p");stats()}}
 function stats(){
- var s=$("sx"),now=Date.now(),all=rows,cut=sp?now-sp*864e5:0,R=all.filter(function(r){return r.ts>=cut}),P2=sp?all.filter(function(r){return r.ts<cut&&r.ts>=cut-sp*864e5}):[];
+ var s=$("sx"),now=Date.now(),all=rows,today=new Date();today.setHours(0,0,0,0);var periodStart=sp?today.getTime()-(sp-1)*864e5:0,cut=periodStart,R=all.filter(function(r){return Number(r.ts)>=cut&&Number(r.ts)<=now}),P2=sp?all.filter(function(r){return Number(r.ts)<periodStart&&Number(r.ts)>=periodStart-sp*864e5}):[];
  function av(a){return a.length?a.reduce(function(t,r){return t+ +r.i},0)/a.length:0}
  function am(a){return a.reduce(function(t,v){return t+v},0)/a.length}
  var head="<div class='chips' id='sp' style='margin:0 0 12px'>"+[[7,"7 أيام"],[30,"30 يوم"],[0,"الكل"]].map(function(x){return "<button type='button' data-p='"+x[0]+"'"+(x[0]==sp?" class='on'":"")+">"+x[1]+"</button>"}).join("")+"</div>";
@@ -541,9 +605,9 @@ $("na").onclick=function(){
   toast("تم إضافة المجال: "+v);
 };
 rcat();
-function go(t){document.querySelector('#nv [data-t="'+t+'"]').click()}
-function sync(t){[].forEach.call($("bn").children,function(b){var g=b.getAttribute("data-g");b.className=(g==t||(g=="m"&&["w","gl","wv","r","e","d","th","gm","cal","trash","hist"].indexOf(t)>-1))?"on":""})}
-$("nv").addEventListener("click",function(e){var t=e.target.getAttribute("data-t");if(t){sync(t);cur=t;$("mn").style.display="none";window.scrollTo(0,0);try{if(location.hash.slice(1)!=t)location.hash=t}catch(x){}}});
+function sync(t){[].forEach.call($("bn").children,function(b){var g=b.getAttribute("data-g");b.className=(g==t||(g=="m"&&["w","gl","wv","r","e","d","th","gm","cal","trash","hist","chat"].indexOf(t)>-1))?"on":""})}
+function go(t){var target=$(t);if(!target||target.tagName!=="SECTION")return;[].forEach.call(document.querySelectorAll("main>section"),function(sec){sec.classList.toggle("on",sec===target)});sync(t);cur=t;$("mn").style.display="none";window.scrollTo(0,0);try{if(location.hash.slice(1)!==t)location.hash=t}catch(x){}}
+$("nv").addEventListener("click",function(e){var b=e.target.closest("[data-t]");if(b)go(b.getAttribute("data-t"))});
 $("bn").onclick=function(e){var b=e.target.closest("button");if(!b)return;var g=b.getAttribute("data-g");
  if(g=="m"){$("mn").style.display=$("mn").style.display=="block"?"none":"block";return}go(g)};
 $("mn").onclick=function(e){var b=e.target.closest("button");if(b)go(b.getAttribute("data-g"))};
@@ -577,9 +641,16 @@ $("md").onclick=function(e){var b=e.target.closest("button");if(!b)return;th.m=b
 try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",function(){if(th.m=="auto")applyTh()})}catch(e){}
 applyTh();
 var PK2="mashaeri_prod",P={tasks:[],habits:[{n:"ماء",d:{}},{n:"رياضة",d:{}},{n:"نوم",d:{}},{n:"قراءة",d:{}}],goals:[],moods:{},pom:{}},CKS="width:22px;height:22px;margin:0;padding:0;accent-color:var(--ac)";
-try{var p0=JSON.parse(localStorage.getItem(PK2)||"null");if(p0)for(var k0 in p0)P[k0]=p0[k0]}catch(e){}
-function pv(){try{localStorage.setItem(PK2,JSON.stringify(P))}catch(e){toast("تعذر الحفظ")}}
-P.arch=P.arch||[];(function(){var c=Date.now()-30*864e5,k=[];P.tasks.forEach(function(t){if(t.done&&t.done<c)P.arch.push(t);else k.push(t)});if(k.length!=P.tasks.length){P.tasks=k;pv()}})();
+try{var p0=JSON.parse(localStorage.getItem(PK2)||"null");if(p0&&typeof p0==="object"&&!Array.isArray(p0))for(var k0 in p0)if(Object.prototype.hasOwnProperty.call(P,k0)||["arch"].indexOf(k0)>-1)P[k0]=p0[k0]}catch(e){}
+P.tasks=Array.isArray(P.tasks)?P.tasks.filter(function(x){return x&&typeof x==="object"}):[];
+P.habits=Array.isArray(P.habits)?P.habits.filter(function(x){return x&&typeof x==="object"}):[];
+P.goals=Array.isArray(P.goals)?P.goals.filter(function(x){return x&&typeof x==="object"}):[];
+P.moods=P.moods&&typeof P.moods==="object"&&!Array.isArray(P.moods)?P.moods:{};
+P.pom=P.pom&&typeof P.pom==="object"&&!Array.isArray(P.pom)?P.pom:{};
+P.arch=Array.isArray(P.arch)?P.arch:[];
+P.habits.forEach(function(h){h.d=h.d&&typeof h.d==="object"&&!Array.isArray(h.d)?h.d:{}});
+P.goals.forEach(function(g){g.s=Array.isArray(g.s)?g.s.filter(function(x){return x&&typeof x==="object"}):[]});
+function pv(){try{localStorage.setItem(PK2,JSON.stringify(P));return true}catch(e){toast("تعذر الحفظ؛ مساحة التخزين قد تكون ممتلئة");return false}}(function(){var c=Date.now()-30*864e5,k=[];P.tasks.forEach(function(t){if(t.done&&t.done<c)P.arch.push(t);else k.push(t)});if(k.length!=P.tasks.length){P.tasks=k;pv()}})();
 function tk(){return dk(Date.now())}
 var ME=["😞","😕","😐","🙂","😄"],EE=["🪫","😴","🙂","⚡","🔥"];
 function qb(k,A,m){return A.map(function(x,i){return "<button type='button' data-k='"+k+"' data-v='"+(i+1)+"'"+(m[k]==i+1?" class='on'":"")+">"+x+"</button>"}).join("")}
@@ -704,7 +775,7 @@ function dopen(k){var r=rows[k];if(!r)return;DI=k;var p=VL.indexOf(k),sh=r.i2!=n
 $("dv").onclick=function(e){var b=e.target.closest("button");if(!b)return;var p=VL.indexOf(DI);
  if(b.id=="dx")dclose();else if(b.id=="dp2"&&p>0)dopen(VL[p-1]);else if(b.id=="dn"&&p>-1&&p<VL.length-1)dopen(VL[p+1]);
  else if(b.id=="dc")cp(rtxt(rows[DI]));else if(b.id=="de"){var k=DI;dclose();edit(k)}
- else if(b.id=="dd")two(b,function(){var removedFeeling=rows[DI];if(removedFeeling)addToTrash("feeling",removedFeeling,removedFeeling.s);rows.splice(DI,1);save();if(ed!==null)resetForm();dclose();draw();toast("تم الحذف")})};
+ else if(b.id=="dd")two(b,function(){var removedFeeling=rows[DI];rows.splice(DI,1);if(!save()){rows.splice(DI,0,removedFeeling);return}if(removedFeeling)addToTrash("feeling",removedFeeling,removedFeeling.s);if(ed!==null)resetForm();dclose();draw();toast("تم الحذف")})};
 document.addEventListener("keydown",function(e){if(e.key=="Escape"&&$("dv").style.display=="block")dclose()});
 var calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1),calendarSelected=dk(Date.now());
 function dayKey(d){return dk(d instanceof Date?d.getTime():+d)}
@@ -720,17 +791,88 @@ function drawCalendar(){var title=$("calmonth"),grid=$("calgrid"),detail=$("cald
 $("calprev").onclick=function(){calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1);drawCalendar()};
 $("calnext").onclick=function(){calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1);drawCalendar()};
 $("calgrid").onclick=function(e){var b=e.target.closest("button[data-day]");if(!b)return;calendarSelected=b.getAttribute("data-day");var d=dateFromKey(calendarSelected);calendarMonth=new Date(d.getFullYear(),d.getMonth(),1);drawCalendar()};
+
+/* Sakina local conversation archive — separate key; legacy app data is untouched. */
+var CHAT_KEY="sakina_chat_v1",chatSessions=[],activeChatId=null;
+try{var chatStored=JSON.parse(localStorage.getItem(CHAT_KEY)||"[]");if(Array.isArray(chatStored))chatSessions=chatStored.filter(function(c){return c&&c.id&&Array.isArray(c.messages)})}catch(chatLoadErr){chatSessions=[]}
+function chatSave(){try{localStorage.setItem(CHAT_KEY,JSON.stringify(chatSessions));return true}catch(e){toast("مساحة التخزين ممتلئة أو غير متاحة؛ صدّر محادثاتك");return false}}
+function chatId(){return "c"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function chatEnsure(){if(!activeChatId||!chatSessions.some(function(c){return c.id===activeChatId})){if(!chatSessions.length){var c={id:chatId(),createdAt:Date.now(),updatedAt:Date.now(),messages:[]};chatSessions.unshift(c)}activeChatId=chatSessions[0].id}}
+function chatSessionTitle(c){var m=c.messages.find(function(x){return x.role==="user"});return m?String(m.text).replace(/\s+/g," ").slice(0,28):"محادثة جديدة"}
+function chatRender(){
+ var box=$("chatMessages"),list=$("chatSessions"),results=$("chatSearchResults"),q=$("chatSearch").value.trim().toLowerCase();
+ chatEnsure();
+ list.innerHTML=chatSessions.slice().sort(function(a,b){return b.updatedAt-a.updatedAt}).map(function(c){return "<button type='button' data-chat-open='"+esc(c.id)+"' class='"+(c.id===activeChatId?"on":"")+"'>"+esc(chatSessionTitle(c))+"</button>"}).join("")||"<span class='sub'>لا توجد محادثات بعد.</span>";
+ var active=chatSessions.find(function(c){return c.id===activeChatId}),msgs=active.messages||[];
+ box.innerHTML=msgs.length?msgs.map(function(m,i){return "<div class='chat-msg "+(m.role==="user"?"user":"")+"'><div>"+esc(m.text)+"</div><div class='meta'>"+fmt(m.ts)+" · "+(m.role==="user"?"أنت":"سكينة")+"</div><button type='button' class='d' data-chat-delete='"+i+"'>حذف الرسالة</button></div>"}).join(""):"<div class='chat-empty'>دي مساحة هادئة للكلام.<br>ابدأ بكتابة أول رسالة، وهتفضل محفوظة هنا.</div>";
+ if(!q){results.innerHTML="";}else{
+  var hits=[];chatSessions.forEach(function(c){c.messages.forEach(function(m){if(String(m.text).toLowerCase().indexOf(q)>-1)hits.push({c:c,m:m})})});
+  results.innerHTML=hits.length?("<b>نتائج البحث: "+hits.length+"</b>"+hits.slice(0,80).map(function(h){return "<button type='button' class='chat-result' data-chat-open='"+esc(h.c.id)+"'><small>"+esc(chatSessionTitle(h.c))+" · "+fmt(h.m.ts)+"</small>"+esc(String(h.m.text).slice(0,240))+"</button>"}).join("")):"<div class='sub'>مفيش نتائج مطابقة.</div>";
+ }
+ box.scrollTop=box.scrollHeight;
+}
+function mergeChatSessions(incoming){var known={};chatSessions.forEach(function(c){known[c.id]=c});incoming.forEach(function(c){if(!c||!c.id||!Array.isArray(c.messages))return;var target=known[c.id];if(!target){chatSessions.push(c);known[c.id]=c;return}var seen={};target.messages.forEach(function(m){if(m&&m.id)seen[m.id]=1});c.messages.forEach(function(m){if(m&&m.id&&!seen[m.id]){target.messages.push(m);seen[m.id]=1}})});chatSave();chatRender()}
+$("chatNew").onclick=function(){var c={id:chatId(),createdAt:Date.now(),updatedAt:Date.now(),messages:[]};chatSessions.unshift(c);activeChatId=c.id;chatSave();chatRender();$("chatInput").focus()};
+var CHAT_ENDPOINT_KEY="sakina_ai_endpoint_v1",CHAT_DEFAULT_ENDPOINT="https://sakina-ai.sakina-companion-26.workers.dev",chatAiEndpoint="",chatAiToken="",chatAiSending=false;
+try{chatAiEndpoint=localStorage.getItem(CHAT_ENDPOINT_KEY)||CHAT_DEFAULT_ENDPOINT;$("chatEndpoint").value=chatAiEndpoint;chatAiStatus("رابط خادم سكينة جاهز تلقائيًا. لإرسال الرسائل، يلزم رمز وصول يجهزه ولي أمرك وموافقتك الصريحة.")}catch(e){chatAiEndpoint=CHAT_DEFAULT_ENDPOINT;$("chatEndpoint").value=CHAT_DEFAULT_ENDPOINT}
+function chatAiStatus(message){$("chatAiStatus").textContent=message}
+$("chatConnect").onclick=function(){
+ var endpoint=$("chatEndpoint").value.trim(),token=$("chatAccessToken").value.trim();
+ try{var u=new URL(endpoint);if(u.protocol!=="https:")throw new Error("https");if(!token)throw new Error("token");}
+ catch(e){chatAiStatus("اكتب رابط خادم صحيح يبدأ بـ https ورمز الوصول الذي أعدّه مسؤول الخادم.");return}
+ chatAiEndpoint=endpoint.replace(/\/$/,"");chatAiToken=token;
+ try{localStorage.setItem(CHAT_ENDPOINT_KEY,chatAiEndpoint)}catch(e){}
+ $("chatAccessToken").value="";
+ chatAiStatus("تم حفظ الرابط ورمز الوصول في الذاكرة لهذه الجلسة. مفتاح مزود الذكاء الاصطناعي لا يدخل التطبيق.");
+ toast("تم إعداد الاتصال لهذه الجلسة");
+};
+$("chatDisconnect").onclick=function(){chatAiEndpoint="";chatAiToken="";$("chatAccessToken").value="";$("chatEndpoint").value="";try{localStorage.removeItem(CHAT_ENDPOINT_KEY)}catch(e){}chatAiStatus("تم فصل الاتصال. الرسائل ستُحفظ محليًا فقط.");};
+function chatRelatedMessages(query,currentId){
+ var words=String(query).toLowerCase().split(/[\\s،,.!?؟؛:]+/).filter(function(w){return w.length>=3}).slice(0,14),hits=[];
+ if(!words.length)return hits;
+ chatSessions.forEach(function(c){if(c.id===currentId)return;c.messages.forEach(function(m){var text=String(m.text||"").toLowerCase(),score=0;words.forEach(function(w){if(text.indexOf(w)>-1)score++});if(score)hits.push({score:score,ts:m.ts,role:m.role,text:String(m.text).slice(0,900)})})});
+ hits.sort(function(a,b){return b.score-a.score||b.ts-a.ts});
+ return hits.slice(0,5).reverse().map(function(m){return {role:m.role==="assistant"?"assistant":"user",text:m.text}});
+}
+async function chatAskAI(conversation){
+ if(!chatAiEndpoint||!chatAiToken){chatAiStatus("الرسالة محفوظة محليًا ولم تُرسل؛ إعداد الخادم غير مكتمل.");return}
+ if(!$("chatAiConsent").checked){chatAiStatus("الرسالة محفوظة محليًا ولم تُرسل. فعّل موافقة الإرسال إذا كنت تريد ردًا من خدمة خارجية.");return}
+ if(chatAiSending)return;
+ chatAiSending=true;var sendButton=$("chatForm").querySelector('button[type="submit"]');sendButton.disabled=true;chatAiStatus("سكينة يجهّز الرد…");
+ var current=conversation.messages.slice(-16).map(function(m){return {role:m.role,text:m.text}});
+ var previous=$("chatUseHistory").checked?chatRelatedMessages(conversation.messages[conversation.messages.length-1].text,conversation.id):[];
+ var messages=previous.concat(current).slice(-24);
+ try{
+  var response=await fetch(chatAiEndpoint,{method:"POST",headers:{"Content-Type":"application/json","X-Sakina-Token":chatAiToken},body:JSON.stringify({messages:messages})});
+  var data=await response.json().catch(function(){return {}});
+  if(!response.ok||!data.reply)throw new Error(data.error||"تعذر الحصول على رد");
+  var active=chatSessions.find(function(c){return c.id===conversation.id});if(!active)throw new Error("المحادثة لم تعد موجودة");
+  var previousUpdated=active.updatedAt,replyMessage={id:chatId(),role:"assistant",text:String(data.reply).slice(0,12000),ts:Date.now()};active.messages.push(replyMessage);active.updatedAt=Date.now();if(!chatSave()){active.messages.pop();active.updatedAt=previousUpdated;chatRender();throw new Error("وصل الرد لكن تعذر حفظه على الجهاز")}chatRender();chatAiStatus("وصل رد سكينة وتم حفظه محليًا.");
+ }catch(error){chatAiStatus("لم يصل الرد: "+(error.message||"تحقق من الاتصال وإعداد الخادم")+". رسالتك ما زالت محفوظة محليًا.");}
+ finally{chatAiSending=false;sendButton.disabled=false;}
+}
+$("chatForm").onsubmit=function(e){e.preventDefault();var v=$("chatInput").value.trim();if(!v)return;chatEnsure();var c=chatSessions.find(function(x){return x.id===activeChatId});var previousUpdated=c.updatedAt,msg={id:chatId(),role:"user",text:v,ts:Date.now()};c.messages.push(msg);c.updatedAt=Date.now();if(chatSave()){$("chatInput").value="";hlog("chat","رسالة جديدة","تم حفظ رسالة في محادثة سكينة");chatRender();chatAskAI(c)}else{c.messages.pop();c.updatedAt=previousUpdated;chatRender();toast("لم تُحفظ الرسالة؛ لم يتم إرسالها")}};
+
+$("chatSessions").onclick=function(e){var b=e.target.closest("[data-chat-open]");if(!b)return;activeChatId=b.getAttribute("data-chat-open");chatRender()};
+$("chatSearchResults").onclick=function(e){var b=e.target.closest("[data-chat-open]");if(!b)return;activeChatId=b.getAttribute("data-chat-open");$("chatSearch").value="";chatRender()};
+$("chatSearch").oninput=chatRender;
+$("chatMessages").onclick=function(e){var b=e.target.closest("[data-chat-delete]");if(!b)return;var c=chatSessions.find(function(x){return x.id===activeChatId}),i=+b.getAttribute("data-chat-delete");if(!c||!c.messages[i])return;if(!confirm("تحذف الرسالة دي نهائيًا؟"))return;c.messages.splice(i,1);c.updatedAt=Date.now();chatSave();chatRender()};
+$("chatClear").onclick=function(){if(!chatSessions.length){toast("مفيش محادثات للحذف");return}if(!confirm("حذف كل محادثات سكينة ورسائلها نهائيًا من هذا الجهاز؟"))return;chatSessions=[];activeChatId=null;chatSave();chatRender();hlog("chat","حذف كل المحادثات","تم حذف سجل محادثات سكينة")};
+$("chatExport").onclick=function(){var data={app:"sakina-chat-export",version:1,exportedAt:Date.now(),conversations:chatSessions};var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="sakina-conversations-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);toast("تم تجهيز ملف المحادثات")};
+chatEnsure();chatRender();
+
 function purgeExpiredTrash(){var before=trashItems.length,limit=30*864e5;trashItems=trashItems.filter(function(x){return Date.now()-(x.deletedAt||Date.now())<limit});if(trashItems.length!==before)persistTrash()}
-function restoreTrashItem(id){var ix=trashItems.findIndex(function(x){return x.id===id});if(ix<0)return;var entry=trashItems[ix],v=entry.item;
- if(entry.type=="feeling"){rows.unshift(v);save();draw()}
- else if(entry.type=="note"){nts.unshift(v);nsv();ndraw()}
- else if(entry.type=="task"){P.tasks.unshift(v);if(!v.id)v.id=freshId("task");pv();tr()}
- else if(entry.type=="habit"){P.habits.unshift(v);pv();hr()}
- else if(entry.type=="goal"){P.goals.unshift(v);pv();gr()}
- else if(entry.type=="goalStep"){var goal=P.goals.find(function(g){return g.t===v.goalTitle});if(!goal){goal={t:v.goalTitle,s:[]};P.goals.unshift(goal)}goal.s.push(v.step);pv();gr()}
- else if(entry.type=="category"){if(CT.indexOf(v)<0)CT.push(v);try{localStorage.setItem(CK,JSON.stringify(CT.slice(7)))}catch(e){}rcat()}
+function restoreTrashItem(id){var ix=trashItems.findIndex(function(x){return x.id===id});if(ix<0)return;var entry=trashItems[ix],v=entry.item,restored=false;
+ if(entry.type=="feeling"){rows.unshift(v);if(save()){restored=true;draw()}else rows.shift()}
+ else if(entry.type=="note"){nts.unshift(v);if(nsv()){restored=true;ndraw()}else nts.shift()}
+ else if(entry.type=="task"){if(!v.id)v.id=freshId("task");P.tasks.unshift(v);if(pv()){restored=true;tr()}else P.tasks.shift()}
+ else if(entry.type=="habit"){P.habits.unshift(v);if(pv()){restored=true;hr()}else P.habits.shift()}
+ else if(entry.type=="goal"){P.goals.unshift(v);if(pv()){restored=true;gr()}else P.goals.shift()}
+ else if(entry.type=="goalStep"){var goal=P.goals.find(function(g){return g.t===v.goalTitle}),created=!goal;if(!goal){goal={t:v.goalTitle,s:[]};P.goals.unshift(goal)}goal.s.push(v.step);if(pv()){restored=true;gr()}else{goal.s.pop();if(created)P.goals.shift()}}
+ else if(entry.type=="category"){var exists=CT.indexOf(v)>-1;if(!exists)CT.push(v);try{if(!exists)localStorage.setItem(CK,JSON.stringify(CT.slice(7)));restored=true;rcat()}catch(e){if(!exists)CT.pop();toast("تعذر حفظ المجال؛ سيظل في سلة المحذوفات")}}
  else return;
- trashItems.splice(ix,1);persistTrash();hlog("trash","استعادة من السلة",entry.label);drawTrash();toast("تمت الاستعادة")}
+ if(!restored)return;
+ trashItems.splice(ix,1);var trashSaved=persistTrash();hlog("trash","استعادة من السلة",entry.label);drawTrash();toast(trashSaved?"تمت الاستعادة":"تمت الاستعادة، لكن تعذر تحديث السلة على الجهاز")}
 function drawTrash(){var el=$("trashlist");if(!el)return;purgeExpiredTrash();el.innerHTML=trashItems.length?trashItems.map(function(x){var type={feeling:"تسجيل مشاعر",note:"كتابة حرة",task:"مهمة",habit:"عادة",goal:"هدف",goalStep:"خطوة هدف",category:"مجال"}[x.type]||"عنصر";return "<div class='trash-item'><div class='row' style='justify-content:space-between;align-items:flex-start'><div style='min-width:0;flex:1'><b>"+esc(x.label)+"</b><div class='meta'>"+type+" · حُذف في "+fmt(x.deletedAt)+"</div></div><div class='actions'><button type='button' class='g' data-restore='"+esc(x.id)+"'>استعادة</button><button type='button' class='d' data-purge='"+esc(x.id)+"'>حذف نهائي</button></div></div></div>"}).join(""):"<div class='em'>سلة المحذوفات فارغة.</div>"}
 $("trashlist").onclick=function(e){var b=e.target.closest("button");if(!b)return;var r=b.getAttribute("data-restore"),d=b.getAttribute("data-purge");if(r)restoreTrashItem(r);else if(d){trashItems=trashItems.filter(function(x){return x.id!==d});persistTrash();drawTrash();toast("تم الحذف النهائي")}};
 $("trashEmpty").onclick=function(){if(!trashItems.length){toast("السلة فارغة بالفعل");return}if(confirm("حذف كل العناصر من السلة نهائيًا؟ لا يمكن التراجع عن ذلك.")){trashItems=[];persistTrash();drawTrash();hlog("trash","إفراغ السلة","");toast("تم إفراغ السلة")}};

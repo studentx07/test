@@ -311,7 +311,7 @@ function hlog(type,action,detail){
 }
 var TRASH_KEY="sakina_trash_v1",trashItems=[];
 try{trashItems=JSON.parse(localStorage.getItem(TRASH_KEY)||"[]");if(!Array.isArray(trashItems))trashItems=[]}catch(e){trashItems=[]}
-function persistTrash(){try{localStorage.setItem(TRASH_KEY,JSON.stringify(trashItems))}catch(e){toast("تعذر حفظ سلة المحذوفات؛ صدّر نسخة احتياطية")}}
+function persistTrash(){try{localStorage.setItem(TRASH_KEY,JSON.stringify(trashItems));return true}catch(e){toast("تعذر حفظ سلة المحذوفات؛ صدّر نسخة احتياطية");return false}}
 function freshId(prefix){return prefix+"-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,9)}
 function addToTrash(type,item,label){if(item==null)return;var copy;try{copy=JSON.parse(JSON.stringify(item))}catch(e){copy=item}trashItems.unshift({id:freshId("trash"),type:type,item:copy,label:String(label||"عنصر"),deletedAt:Date.now()});if(trashItems.length>500)trashItems.length=500;persistTrash();hlog("trash","نقل إلى السلة",String(label||"عنصر"))}
 function hdraw(){
@@ -497,7 +497,7 @@ $("pr").onclick=function(){try{localStorage.removeItem(PK);toast("تم إلغا�
 function two(b,fn){if(b.getAttribute("data-confirm")){fn()}else{var t=b.textContent;b.setAttribute("data-confirm","1");b.textContent="تأكيد؟";setTimeout(function(){if(b.parentNode){b.removeAttribute("data-confirm");b.textContent=t}},3000)}}
 var NK="mashaeri_notes",nts=[],wty="تفريغ",WT=["تفريغ","خيال","فكرة","امتنان"],WE={"تفريغ":"🌊 ","خيال":"✨ ","فكرة":"💡 ","امتنان":"🙏 "};
 try{nts=JSON.parse(localStorage.getItem(NK)||"[]")}catch(e){nts=[]}
-function nsv(){try{localStorage.setItem(NK,JSON.stringify(nts))}catch(e){toast("تعذر الحفظ")}}
+function nsv(){try{localStorage.setItem(NK,JSON.stringify(nts));return true}catch(e){toast("تعذر الحفظ");return false}}
 $("wt").innerHTML=WT.map(function(x,i){return "<button type='button' data-v='"+x+"'"+(i?"":" class='on'")+">"+WE[x]+x+"</button>"}).join("");
 $("wt").onclick=function(e){var b=e.target.closest("button");if(!b)return;wty=b.getAttribute("data-v");[].forEach.call($("wt").children,function(x){x.className=x==b?"on":""})};
 $("wk").innerHTML="<option value=''>الكل</option>"+WT.map(function(x){return "<option>"+x+"</option>"}).join("");
@@ -862,16 +862,17 @@ $("chatExport").onclick=function(){var data={app:"sakina-chat-export",version:1,
 chatEnsure();chatRender();
 
 function purgeExpiredTrash(){var before=trashItems.length,limit=30*864e5;trashItems=trashItems.filter(function(x){return Date.now()-(x.deletedAt||Date.now())<limit});if(trashItems.length!==before)persistTrash()}
-function restoreTrashItem(id){var ix=trashItems.findIndex(function(x){return x.id===id});if(ix<0)return;var entry=trashItems[ix],v=entry.item;
- if(entry.type=="feeling"){rows.unshift(v);save();draw()}
- else if(entry.type=="note"){nts.unshift(v);nsv();ndraw()}
- else if(entry.type=="task"){P.tasks.unshift(v);if(!v.id)v.id=freshId("task");pv();tr()}
- else if(entry.type=="habit"){P.habits.unshift(v);pv();hr()}
- else if(entry.type=="goal"){P.goals.unshift(v);pv();gr()}
- else if(entry.type=="goalStep"){var goal=P.goals.find(function(g){return g.t===v.goalTitle});if(!goal){goal={t:v.goalTitle,s:[]};P.goals.unshift(goal)}goal.s.push(v.step);pv();gr()}
- else if(entry.type=="category"){if(CT.indexOf(v)<0)CT.push(v);try{localStorage.setItem(CK,JSON.stringify(CT.slice(7)))}catch(e){}rcat()}
+function restoreTrashItem(id){var ix=trashItems.findIndex(function(x){return x.id===id});if(ix<0)return;var entry=trashItems[ix],v=entry.item,restored=false;
+ if(entry.type=="feeling"){rows.unshift(v);if(save()){restored=true;draw()}else rows.shift()}
+ else if(entry.type=="note"){nts.unshift(v);if(nsv()){restored=true;ndraw()}else nts.shift()}
+ else if(entry.type=="task"){if(!v.id)v.id=freshId("task");P.tasks.unshift(v);if(pv()){restored=true;tr()}else P.tasks.shift()}
+ else if(entry.type=="habit"){P.habits.unshift(v);if(pv()){restored=true;hr()}else P.habits.shift()}
+ else if(entry.type=="goal"){P.goals.unshift(v);if(pv()){restored=true;gr()}else P.goals.shift()}
+ else if(entry.type=="goalStep"){var goal=P.goals.find(function(g){return g.t===v.goalTitle}),created=!goal;if(!goal){goal={t:v.goalTitle,s:[]};P.goals.unshift(goal)}goal.s.push(v.step);if(pv()){restored=true;gr()}else{goal.s.pop();if(created)P.goals.shift()}}
+ else if(entry.type=="category"){var exists=CT.indexOf(v)>-1;if(!exists)CT.push(v);try{if(!exists)localStorage.setItem(CK,JSON.stringify(CT.slice(7)));restored=true;rcat()}catch(e){if(!exists)CT.pop();toast("تعذر حفظ المجال؛ سيظل في سلة المحذوفات")}}
  else return;
- trashItems.splice(ix,1);persistTrash();hlog("trash","استعادة من السلة",entry.label);drawTrash();toast("تمت الاستعادة")}
+ if(!restored)return;
+ trashItems.splice(ix,1);var trashSaved=persistTrash();hlog("trash","استعادة من السلة",entry.label);drawTrash();toast(trashSaved?"تمت الاستعادة":"تمت الاستعادة، لكن تعذر تحديث السلة على الجهاز")}
 function drawTrash(){var el=$("trashlist");if(!el)return;purgeExpiredTrash();el.innerHTML=trashItems.length?trashItems.map(function(x){var type={feeling:"تسجيل مشاعر",note:"كتابة حرة",task:"مهمة",habit:"عادة",goal:"هدف",goalStep:"خطوة هدف",category:"مجال"}[x.type]||"عنصر";return "<div class='trash-item'><div class='row' style='justify-content:space-between;align-items:flex-start'><div style='min-width:0;flex:1'><b>"+esc(x.label)+"</b><div class='meta'>"+type+" · حُذف في "+fmt(x.deletedAt)+"</div></div><div class='actions'><button type='button' class='g' data-restore='"+esc(x.id)+"'>استعادة</button><button type='button' class='d' data-purge='"+esc(x.id)+"'>حذف نهائي</button></div></div></div>"}).join(""):"<div class='em'>سلة المحذوفات فارغة.</div>"}
 $("trashlist").onclick=function(e){var b=e.target.closest("button");if(!b)return;var r=b.getAttribute("data-restore"),d=b.getAttribute("data-purge");if(r)restoreTrashItem(r);else if(d){trashItems=trashItems.filter(function(x){return x.id!==d});persistTrash();drawTrash();toast("تم الحذف النهائي")}};
 $("trashEmpty").onclick=function(){if(!trashItems.length){toast("السلة فارغة بالفعل");return}if(confirm("حذف كل العناصر من السلة نهائيًا؟ لا يمكن التراجع عن ذلك.")){trashItems=[];persistTrash();drawTrash();hlog("trash","إفراغ السلة","");toast("تم إفراغ السلة")}};

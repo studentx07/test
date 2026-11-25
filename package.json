@@ -8,7 +8,7 @@
     "test": "node --test test/*.test.js",
     "android:add": "npm run prepare:web && cap add android",
     "android:sync": "npm run prepare:web && cap sync android",
-    "android:build": "npm run prepare:web && cap sync android && cd android && chmod +x gradlew && ./gradlew assembleDebug"
+    "android:build": "npm run prepare:web && cap sync android && npx capacitor-assets generate --android && cd android && chmod +x gradlew && ./gradlew assembleDebug"
   },
   "dependencies": {
     "@capacitor/android": "^7.0.0",

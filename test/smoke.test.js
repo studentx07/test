@@ -55,6 +55,61 @@ test('all critical removed item types have restore handlers', () => {
   assert.match(html, /function purgeExpiredTrash\(\)/);
 });
 
+test('failed persistence keeps restored items in the recycle bin', () => {
+  const match = html.match(/function restoreTrashItem\(id\)\{[\s\S]*?\nfunction drawTrash/);
+  assert.ok(match, 'expected recycle-bin restore handler');
+  const restore = new vm.Script(`(${match[0].replace(/\nfunction drawTrash$/, '')})`);
+  const cases = [
+    { type: 'feeling', item: { ts: 1 }, field: 'rows', save: 'save' },
+    { type: 'note', item: { ts: 1 }, field: 'nts', save: 'nsv' },
+    { type: 'task', item: { t: 'task' }, field: 'tasks', save: 'pv' },
+    { type: 'habit', item: { n: 'habit' }, field: 'habits', save: 'pv' },
+    { type: 'goal', item: { t: 'goal' }, field: 'goals', save: 'pv' },
+    { type: 'goalStep', item: { goalTitle: 'goal', step: { s: 'step' } }, field: 'goals', save: 'pv' },
+    { type: 'category', item: 'custom', field: 'categories', save: 'category' }
+  ];
+
+  for (const scenario of cases) {
+    const entry = { id: 'trash-1', type: scenario.type, item: scenario.item };
+    const context = {
+      trashItems: [entry],
+      rows: [],
+      nts: [],
+      P: { tasks: [], habits: [], goals: [] },
+      CT: [],
+      CK: 'categories',
+      localStorage: { setItem() { throw new Error('storage full'); } },
+      save() { return scenario.save !== 'save'; },
+      nsv() { return scenario.save !== 'nsv'; },
+      pv() { return scenario.save !== 'pv'; },
+      draw() {},
+      ndraw() {},
+      tr() {},
+      hr() {},
+      gr() {},
+      rcat() {},
+      freshId() { return 'new-id'; },
+      persistTrash() {},
+      hlog() {},
+      drawTrash() {},
+      toast() {}
+    };
+    const restoreItem = restore.runInNewContext(context);
+
+    restoreItem(entry.id);
+
+    assert.equal(context.trashItems.length, 1, `${scenario.type} should remain in trash`);
+    if (scenario.field === 'categories') {
+      assert.deepEqual(context.CT, []);
+    } else {
+      const target = scenario.field === 'rows' || scenario.field === 'nts'
+        ? context[scenario.field]
+        : context.P[scenario.field];
+      assert.deepEqual(target, [], `${scenario.type} should be rolled back`);
+    }
+  }
+});
+
 test('PWA icon files and Capacitor web build configuration exist', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
   for (const icon of manifest.icons) {
@@ -64,6 +119,10 @@ test('PWA icon files and Capacitor web build configuration exist', () => {
   assert.equal(cap.webDir, 'www');
   assert.ok(fs.existsSync(path.join(root, 'scripts', 'prepare-web.js')));
   assert.ok(fs.existsSync(path.join(root, '.github', 'workflows', 'build-apk.yml')));
+  const androidWorkflow = fs.readFileSync(path.join(root, '.github', 'workflows', 'build-android.yml'), 'utf8');
+  assert.match(androidWorkflow, /npx capacitor-assets generate --android/);
+  const packageJson = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+  assert.match(packageJson.scripts['android:build'], /capacitor-assets generate --android/);
 });
 
 test('encrypted backup crypto settings support authenticated round-trip', async () => {

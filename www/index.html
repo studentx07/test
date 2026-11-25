@@ -324,7 +324,7 @@ var sp=7;
 function hbx(o){var ks=Object.keys(o).sort(function(a,b){return o[b]-o[a]}).slice(0,6),m=o[ks[0]]||1;return ks.map(function(k){return "<div class='hb'><span style='width:92px'>"+esc(k)+"</span><i style='width:"+Math.round(o[k]/m*50)+"%'></i><em>"+o[k]+"</em></div>"}).join("")}
 function bp(){$("sp").onclick=function(e){var b=e.target.closest("button");if(!b)return;sp=+b.getAttribute("data-p");stats()}}
 function stats(){
- var s=$("sx"),now=Date.now(),all=rows,cut=sp?now-sp*864e5:0,R=all.filter(function(r){return r.ts>=cut}),P=sp?all.filter(function(r){return r.ts<cut&&r.ts>=cut-sp*864e5}):[];
+ var s=$("sx"),now=Date.now(),all=rows,cut=sp?now-sp*864e5:0,R=all.filter(function(r){return r.ts>=cut}),P2=sp?all.filter(function(r){return r.ts<cut&&r.ts>=cut-sp*864e5}):[];
  function av(a){return a.length?a.reduce(function(t,r){return t+ +r.i},0)/a.length:0}
  function am(a){return a.reduce(function(t,v){return t+v},0)/a.length}
  var head="<div class='chips' id='sp' style='margin:0 0 12px'>"+[[7,"7 أيام"],[30,"30 يوم"],[0,"الكل"]].map(function(x){return "<button type='button' data-p='"+x[0]+"'"+(x[0]==sp?" class='on'":"")+">"+x[1]+"</button>"}).join("")+"</div>";
@@ -336,7 +336,7 @@ function stats(){
   (r.c||[]).forEach(function(x){cc[x]=(cc[x]||0)+1;(ca[x]=ca[x]||[]).push(i)});
   tm[t]=(tm[t]||0)+1;(ta[t]=ta[t]||[]).push(i);if(r.a&&r.i2!=null){imp+=r.i-r.i2;ni++}});
  function worst(o){var b=null,v=-1;Object.keys(o).forEach(function(k){if(o[k].length>=2&&am(o[k])>v){v=am(o[k]);b=k}});return b?[b,v]:null}
- var a=av(R),top=Object.keys(cnt).sort(function(x,y){return cnt[y]-cnt[x]})[0],delta=P.length?a-av(P):null;
+ var a=av(R),top=Object.keys(cnt).sort(function(x,y){return cnt[y]-cnt[x]})[0],delta=P2.length?a-av(P2):null;
  var cards="<div class='st'><div><b>"+R.length+"</b><span>تسجيل</span></div><div><b>"+a.toFixed(1)+"</b><span>متوسط الشدة"+(delta==null?"":delta<-0.2?" ↓":delta>0.2?" ↑":"")+"</span></div><div><b>"+esc(top||"-")+"</b><span>أكتر شعور</span></div></div>";
  var ins=[],w1=worst(ta),w2=worst(ca);
  if(delta!=null&&Math.abs(delta)>=0.3)ins.push(delta<0?"متوسط الشدة قل "+Math.abs(delta).toFixed(1)+" عن الفترة اللي قبلها 👏":"متوسط الشدة زاد "+delta.toFixed(1)+" عن الفترة اللي قبلها، خد بالك من نفسك.");
@@ -348,7 +348,7 @@ function stats(){
  for(var d=n-1;d>=0;d--){var st=d0.getTime()-d*864e5,v=all.filter(function(r){return r.ts>=st&&r.ts<st+864e5});bars.push({l:new Date(st).toLocaleDateString("ar-EG",{weekday:"short"}),a:v.length?av(v):0,n:v.length})}
  var tr="<div class='card'><h2>الشدة بمرور الأيام"+(n==30?" (آخر 30 يوم)":"")+"</h2><div class='bars' style='height:130px;gap:"+(n==7?6:2)+"px'>"+bars.map(function(b){return "<div>"+(n==7&&b.n?b.a.toFixed(1):"")+"<i style='height:"+b.a*9+"px;opacity:"+(b.n?1:.25)+"'></i>"+(n==7?b.l:"")+"</div>"}).join("")+"</div></div>";
  function sec(t,o,op){return Object.keys(o).length?"<details class='card'"+(op?" open":"")+"><summary style='font-weight:600;cursor:pointer'>"+t+"</summary><div style='margin-top:8px'>"+hbx(o)+"</div></details>":""}
- var GP=window.P,KT=function(k){var a=k.split("-");return new Date(+a[0],+a[1],+a[2]).getTime()},dn=0,fc=0,mv=[],hc={},wd={},ea={},ei={},WN=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+ var GP=P,KT=function(k){var a=k.split("-");return new Date(+a[0],+a[1],+a[2]).getTime()},dn=0,fc=0,mv=[],hc={},wd={},ea={},ei={},WN=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
  GP.tasks.concat(GP.arch||[]).forEach(function(t){if(t.done&&t.done>=cut)dn++});
  Object.keys(GP.pom).forEach(function(k){if(KT(k)>=cut)fc+=GP.pom[k]});
  Object.keys(GP.moods).forEach(function(k){var m=GP.moods[k].m;if(m&&KT(k)>=cut)mv.push(m)});
@@ -433,7 +433,7 @@ $("pcb").onclick=function(){var o=$("pcf").style.display=="none";$("pcf").style.
 $("pcf").onchange=function(e){var i=e.target,k=i.getAttribute("data-p");if(!k)return;var v=Math.round(+i.value),mn=k=="n"?0:1,mx=k=="f"?180:k=="b"?60:k=="l"?90:12;v=isNaN(v)?PC[k]:Math.min(mx,Math.max(mn,v));PC[k]=v;i.value=v;psc()};
 $("pcf").onclick=function(e){var b=e.target.closest("button");if(!b)return;var t=b.getAttribute("data-t"),r=b.getAttribute("data-pr");if(t){PC[t]=PC[t]?0:1;psc();pcr()}else if(r){var a=r.split(",");PC.f=+a[0];PC.b=+a[1];PC.l=+a[2];psc();pcr()}};
 function psv(){try{localStorage.setItem("mashaeri_pm",JSON.stringify({mode:pm.mode,end:pm.end,left:pm.run?Math.max(0,Math.round((pm.end-Date.now())/1000)):pm.left,run:pm.run}))}catch(e){}}
-addEventListener("pagehide",psv);document.addEventListener("visibilitychange",function(){if(document.hidden)psv()});
+addEventListener("pagehide",psv);document.addEventListener("visibilitychange",function(){if(document.hidden)psv();else if(pm.run)ptick();});
 try{var q9=JSON.parse(localStorage.getItem("mashaeri_pm")||"null");if(q9){pm.mode=q9.mode;pm.left=q9.left;
  if(q9.run){pm.run=true;pm.end=q9.end;$("pg").textContent="إيقاف مؤقت";pm.iv=setInterval(ptick,500)}else $("pg").textContent=pm.left<pdur(pm.mode)?"كمّل":"ابدأ "+(pm.mode=="f"?"تركيز":"راحة");
  pd();ptick()}}catch(e){}
@@ -530,9 +530,9 @@ $("dv").onclick=function(e){var b=e.target.closest("button");if(!b)return;var p=
  else if(b.id=="dc")cp(rtxt(rows[DI]));else if(b.id=="de"){var k=DI;dclose();edit(k)}
  else if(b.id=="dd")two(b,function(){rows.splice(DI,1);save();if(ed!==null)resetForm();dclose();draw();toast("تم الحذف")})};
 document.addEventListener("keydown",function(e){if(e.key=="Escape"&&$("dv").style.display=="block")dclose()});
-var WD="mashaeri_draft_w";
+var WD="mashaeri_draft_w",wdTimer=null;
 try{var wd0=localStorage.getItem(WD);if(wd0)$("wx").value=wd0}catch(e){}
-$("wx").addEventListener("input",function(){try{localStorage.setItem(WD,$("wx").value)}catch(e){}});
+$("wx").addEventListener("input",function(){clearTimeout(wdTimer);wdTimer=setTimeout(function(){try{localStorage.setItem(WD,$("wx").value)}catch(e){}},500)});
 try{localStorage.setItem("mashaeri_t","1");localStorage.removeItem("mashaeri_t")}catch(e){window.stoff=1}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 bkn();

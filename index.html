@@ -285,9 +285,9 @@ button[disabled]{opacity:.4;pointer-events:none}
 <script>
 var K="mashaeri_v1",rows=[],EM=["قلق","حزن","غضب","خوف","ذنب","خجل","إحباط","وحدة","توتر","غيرة","ملل","ارتباك","خيبة أمل","فرح","هدوء","فخر","امتنان","حب"],
 DS=["كل شيء أو لا شيء","قراءة أفكار","توقع الأسوأ","تعميم","لوم النفس","لازم وينبغي"],se=[],sd=[],CT=["شغل","أسرة","علاقات","صحة","مال","دراسة","نفس"],sc=[];
-try{rows=JSON.parse(localStorage.getItem(K)||"[]")}catch(e){rows=[]}
+try{var storedRows=JSON.parse(localStorage.getItem(K)||"[]");rows=Array.isArray(storedRows)?storedRows.filter(function(r){return r&&typeof r==="object"&&!Array.isArray(r)&&Number.isFinite(Number(r.ts))}).map(function(r){return Object.assign({},r,{ts:Number(r.ts),s:String(r.s||""),t:String(r.t||""),m:String(r.m||""),i:String(Math.max(0,Math.min(10,Number(r.i)||0))),d:Array.isArray(r.d)?r.d:[],c:Array.isArray(r.c)?r.c:[],a:String(r.a||"")})}):[]}catch(e){rows=[]}
 var $=function(x){return document.getElementById(x)};
-function save(){try{localStorage.setItem(K,JSON.stringify(rows))}catch(e){toast("تعذر الحفظ على الجهاز، انسخ نسخة احتياطية")}}
+function save(){try{localStorage.setItem(K,JSON.stringify(rows));return true}catch(e){toast("تعذر الحفظ على الجهاز. احتفظ بالبيانات وصدّر نسخة احتياطية بعد توفير مساحة.");return false}}
 function esc(s){var d=document.createElement("div");d.textContent=s==null?"":s;return d.innerHTML}
 function toast(m){var t=$("to");t.textContent=m;t.className="toast on";setTimeout(function(){t.className="toast"},1600)}
 function fmt(ts){return new Date(ts).toLocaleString("ar-EG",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"})}
@@ -419,10 +419,11 @@ $("f").onsubmit=function(e){e.preventDefault();
  var all=se.concat($("m").value.split(/[،,]/).map(function(x){return x.trim()}).filter(Boolean));
  if(!all.length){toast("اختار شعور واحد على الأقل");return}
  var a=$("al").value.trim();
- var o={ts:ed!=null&&rows[ed]?rows[ed].ts:Date.now(),s:$("s").value.trim(),t:$("t").value.trim(),m:all.join("، "),i:$("i").value,d:sd.slice(),c:sc.slice(),a:a,i2:a?$("i2").value:null};
- if(ed!=null&&rows[ed])rows[ed]=o;else rows.unshift(o);
- save();resetForm();toast("تم الحفظ، "+CL[Math.floor(Math.random()*CL.length)]);draw();
- hlog("emotion",ed!=null?"تعديل":"إضافة","الموقف: "+o.s+" | الشعور: "+o.m);
+ var wasEdit=ed!=null&&!!rows[ed],oldRecord=wasEdit?rows[ed]:null,o={ts:wasEdit?rows[ed].ts:Date.now(),s:$("s").value.trim(),t:$("t").value.trim(),m:all.join("، "),i:$("i").value,d:sd.slice(),c:sc.slice(),a:a,i2:a?$("i2").value:null};
+ if(wasEdit)rows[ed]=o;else rows.unshift(o);
+ if(!save()){if(wasEdit)rows[ed]=oldRecord;else rows.shift();return}
+ resetForm();toast("تم الحفظ، "+CL[Math.floor(Math.random()*CL.length)]);draw();
+ hlog("emotion",wasEdit?"تعديل":"إضافة","الموقف: "+o.s+" | الشعور: "+o.m);
 };
 var ed=null;
 function resetForm(){ed=null;$("f").reset();se.length=0;sd.length=0;sc.length=0;hint();[].forEach.call(document.querySelectorAll("#ce button,#cd button,#cc button"),function(x){x.className=""});$("iv").textContent="5";$("i2v").textContent="5";$("sv").textContent="حفظ في الجدول";$("cn").style.display="none"}
@@ -452,8 +453,10 @@ function rtxt(r){var l=["📅 التاريخ: "+fmt(r.ts),"📍 الموقف: "+
  if(r.d&&r.d.length)l.push("🧩 نمط التفكير: "+r.d.join("، "));if(r.a)l.push("🔄 الفكرة البديلة: "+r.a);return l.join("\n")}
 $("ct").onclick=function(){cp(rows.length?rows.map(function(r){return rtxt(r)}).join("\n\n──────────\n\n"):"")};
 $("rs").onclick=function(){(async function(){try{var d=await decodeBackupText($("bk").value),R=Array.isArray(d)?d:d.rows;if(!Array.isArray(R))throw 0;
- var n=function(v){v=+v;return isNaN(v)?0:Math.min(10,Math.max(0,v))},have={},add=0;rows.forEach(function(r){have[r.ts]=1});
- R.forEach(function(r){if(r&&r.ts&&r.s&&!have[r.ts]){r.i=n(r.i);if(r.i2!=null)r.i2=n(r.i2);have[r.ts]=1;rows.push(r);add++}});
+ var n=function(v){v=+v;return isNaN(v)?0:Math.min(10,Math.max(0,v))},have=Object.create(null),add=0;
+ function recordKey(r){return JSON.stringify([Number(r.ts)||0,String(r.s||""),String(r.t||""),String(r.m||""),String(r.i==null?"":r.i),String(r.a||""),String(r.i2==null?"":r.i2)])}
+ rows.forEach(function(r){have[recordKey(r)]=1});
+ R.forEach(function(r){if(r&&Number.isFinite(Number(r.ts))&&r.s){r.i=n(r.i);if(r.i2!=null)r.i2=n(r.i2);var key=recordKey(r);if(!have[key]){have[key]=1;rows.push(r);add++}}});
  rows.sort(function(a,b){return b.ts-a.ts});save();
  if(!Array.isArray(d)){var hv={};nts.forEach(function(x){hv[x.ts]=1});(d.notes||[]).forEach(function(x){if(x&&x.ts&&x.x&&!hv[x.ts]){nts.push(x);hv[x.ts]=1}});nts.sort(function(a,b){return b.ts-a.ts});nsv();
   var q=d.prod||{};try{for(var gk in d.g||{})gbs(gk,+d.g[gk],gk!="a")}catch(e){}
@@ -637,9 +640,16 @@ $("md").onclick=function(e){var b=e.target.closest("button");if(!b)return;th.m=b
 try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",function(){if(th.m=="auto")applyTh()})}catch(e){}
 applyTh();
 var PK2="mashaeri_prod",P={tasks:[],habits:[{n:"ماء",d:{}},{n:"رياضة",d:{}},{n:"نوم",d:{}},{n:"قراءة",d:{}}],goals:[],moods:{},pom:{}},CKS="width:22px;height:22px;margin:0;padding:0;accent-color:var(--ac)";
-try{var p0=JSON.parse(localStorage.getItem(PK2)||"null");if(p0)for(var k0 in p0)P[k0]=p0[k0]}catch(e){}
-function pv(){try{localStorage.setItem(PK2,JSON.stringify(P))}catch(e){toast("تعذر الحفظ")}}
-P.arch=P.arch||[];(function(){var c=Date.now()-30*864e5,k=[];P.tasks.forEach(function(t){if(t.done&&t.done<c)P.arch.push(t);else k.push(t)});if(k.length!=P.tasks.length){P.tasks=k;pv()}})();
+try{var p0=JSON.parse(localStorage.getItem(PK2)||"null");if(p0&&typeof p0==="object"&&!Array.isArray(p0))for(var k0 in p0)if(Object.prototype.hasOwnProperty.call(P,k0)||["arch"].indexOf(k0)>-1)P[k0]=p0[k0]}catch(e){}
+P.tasks=Array.isArray(P.tasks)?P.tasks.filter(function(x){return x&&typeof x==="object"}):[];
+P.habits=Array.isArray(P.habits)?P.habits.filter(function(x){return x&&typeof x==="object"}):[];
+P.goals=Array.isArray(P.goals)?P.goals.filter(function(x){return x&&typeof x==="object"}):[];
+P.moods=P.moods&&typeof P.moods==="object"&&!Array.isArray(P.moods)?P.moods:{};
+P.pom=P.pom&&typeof P.pom==="object"&&!Array.isArray(P.pom)?P.pom:{};
+P.arch=Array.isArray(P.arch)?P.arch:[];
+P.habits.forEach(function(h){h.d=h.d&&typeof h.d==="object"&&!Array.isArray(h.d)?h.d:{}});
+P.goals.forEach(function(g){g.s=Array.isArray(g.s)?g.s.filter(function(x){return x&&typeof x==="object"}):[]});
+function pv(){try{localStorage.setItem(PK2,JSON.stringify(P));return true}catch(e){toast("تعذر الحفظ؛ مساحة التخزين قد تكون ممتلئة");return false}}(function(){var c=Date.now()-30*864e5,k=[];P.tasks.forEach(function(t){if(t.done&&t.done<c)P.arch.push(t);else k.push(t)});if(k.length!=P.tasks.length){P.tasks=k;pv()}})();
 function tk(){return dk(Date.now())}
 var ME=["😞","😕","😐","🙂","😄"],EE=["🪫","😴","🙂","⚡","🔥"];
 function qb(k,A,m){return A.map(function(x,i){return "<button type='button' data-k='"+k+"' data-v='"+(i+1)+"'"+(m[k]==i+1?" class='on'":"")+">"+x+"</button>"}).join("")}

@@ -39,6 +39,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Test web app
+        run: npm test
+
+      - name: Prepare web app
+        run: npm run prepare:web
+
       - name: Create Android project
         run: npx cap add android
 

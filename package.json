@@ -4,6 +4,8 @@
   "private": true,
   "description": "Sakina app Android build project",
   "scripts": {
+    "prepare:web": "node scripts/prepare-web.js",
+    "test": "node --test",
     "android:add": "cap add android",
     "android:sync": "cap sync android"
   },
@@ -18,10 +20,10 @@
   "capacitor": {
     "assets": {
       "icon": {
-        "src": "www/icon-512.png"
+        "src": "assets/icon.png"
       },
       "splash": {
-        "src": "www/icon-512.png"
+        "src": "assets/splash.png"
       }
     }
   }

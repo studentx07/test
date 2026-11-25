@@ -1,13 +1,14 @@
 {
   "name": "sakina-android",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "private": true,
-  "description": "Sakina app Android build project",
+  "description": "Sakina offline-first personal wellbeing and productivity app",
   "scripts": {
     "prepare:web": "node scripts/prepare-web.js",
     "test": "node --test test/*.test.js",
-    "android:add": "cap add android",
-    "android:sync": "cap sync android"
+    "android:add": "npm run prepare:web && cap add android",
+    "android:sync": "npm run prepare:web && cap sync android",
+    "android:build": "npm run prepare:web && cap sync android && cd android && chmod +x gradlew && ./gradlew assembleDebug"
   },
   "dependencies": {
     "@capacitor/android": "^7.0.0",

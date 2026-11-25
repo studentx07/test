@@ -34,6 +34,14 @@ test('calendar, recycle bin, history and backup UI are present', () => {
   }
 });
 
+test('statistics editor validates edits and sends deleted records to trash', () => {
+  assert.match(html, /data-est=/);
+  assert.match(html, /data-esd=/);
+  assert.match(html, /function openStatsEditor\(index\)/);
+  assert.match(html, /شدة الشعور يجب أن تكون من 0 إلى 10/);
+  assert.match(html, /addToTrash\("feeling",removed,removed\.s\)/);
+});
+
 test('deletion confirmation uses a separate attribute from task checkbox IDs', () => {
   assert.match(html, /function two\(b,fn\)\{if\(b\.getAttribute\("data-confirm"\)\)/);
   assert.match(html, /data-c='"\+esc\(t\.id\)\+"/);

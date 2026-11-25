@@ -275,7 +275,7 @@ function emOpen(title,contentHTML,onSave){
 }
 function emClose(){$("em").style.display="none";emCallback=null}
 $("emcancel").onclick=emClose;
-$("emsave").onclick=function(){if(emCallback)emCallback();emClose()};
+$("emsave").onclick=function(){if(emCallback&&emCallback()===false)return;emClose()};
 $("em").onclick=function(e){if(e.target.id=="em")emClose()};
 // ============ دالة إحصائيات المشاعر مع التعديل ============
 function emoSection(R){
@@ -301,6 +301,43 @@ function emoSection(R){
       "</details>";
     }).join("")+"</div>";
 }
+function statsRecordIndex(ts){return rows.findIndex(function(r){return String(r.ts)===String(ts)})}
+function openStatsEditor(index){
+  var r=rows[index];
+  if(!r)return;
+  emOpen("تعديل التسجيل",
+    "<label>الموقف<textarea id='statsSituation' required>"+esc(r.s)+"</textarea></label>"+
+    "<label>الفكرة<textarea id='statsThought' required>"+esc(r.t)+"</textarea></label>"+
+    "<label>المشاعر<input id='statsEmotions' value='"+esc(r.m)+"' required></label>"+
+    "<label>شدة الشعور من 0 إلى 10<input id='statsIntensity' type='number' min='0' max='10' step='1' value='"+esc(r.i)+"' required></label>"+
+    "<label>الفكرة البديلة<textarea id='statsAlternative'>"+esc(r.a||"")+"</textarea></label>"+
+    "<label>الشدة بعد الفكرة البديلة<input id='statsAfter' type='number' min='0' max='10' step='1' value='"+esc(r.i2==null?r.i:r.i2)+"'></label>",
+    function(){
+      var situation=$("statsSituation").value.trim(),thought=$("statsThought").value.trim();
+      var emotions=$("statsEmotions").value.split(/[،,]/).map(function(x){return x.trim()}).filter(Boolean);
+      var intensityValue=$("statsIntensity").value.trim(),afterValue=$("statsAfter").value.trim(),intensity=Number(intensityValue),alternative=$("statsAlternative").value.trim(),after=Number(afterValue);
+      if(!situation||!thought||!emotions.length){toast("املأ الموقف والفكرة وشعورًا واحدًا على الأقل");return false}
+      if(!intensityValue||!Number.isInteger(intensity)||intensity<0||intensity>10){toast("شدة الشعور يجب أن تكون من 0 إلى 10");return false}
+      if(alternative&&(!afterValue||!Number.isInteger(after)||after<0||after>10)){toast("الشدة بعد الفكرة البديلة يجب أن تكون من 0 إلى 10");return false}
+      r.s=situation;r.t=thought;r.m=emotions.join("، ");r.i=String(intensity);r.a=alternative;r.i2=alternative?String(after):null;
+      save();hlog("emotion","تعديل من الإحصائيات","الموقف: "+r.s+" | الشعور: "+r.m);draw();stats();toast("تم تحديث التسجيل");
+      return true;
+    });
+}
+$("sx").onclick=function(e){
+  var editButton=e.target.closest("[data-est]"),deleteButton=e.target.closest("[data-esd]"),button=editButton||deleteButton;
+  if(!button)return;
+  var index=statsRecordIndex(button.getAttribute(editButton?"data-est":"data-esd"));
+  if(index<0)return;
+  if(editButton){openStatsEditor(index);return}
+  two(button,function(){
+    index=statsRecordIndex(button.getAttribute("data-esd"));
+    if(index<0)return;
+    var removed=rows[index];
+    if(removed)addToTrash("feeling",removed,removed.s);
+    rows.splice(index,1);save();hlog("emotion","حذف من الإحصائيات",removed.s);draw();stats();toast("تم نقل التسجيل إلى سلة المحذوفات");
+  });
+};
 // ============ دالة رسم الجدول ============
 function draw(){skr();
  var q=$("q").value.trim(),fe=$("fe").value,fc=$("fc").value,b=$("tb"),list=rows.map(function(r,k){return{r:r,k:k}}).filter(function(o){

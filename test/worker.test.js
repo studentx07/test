@@ -10,7 +10,7 @@ const root = path.resolve(__dirname, '..');
 const workerSource = fs.readFileSync(path.join(root, 'worker', 'index.js'), 'utf8');
 
 function loadWorker() {
-  const source = workerSource.replace('export default', 'const worker =') + '\\nworker;';
+  const source = workerSource.replace('export default', 'const worker =') + '\nworker;';
   return vm.runInNewContext(source, {
     TextEncoder, TextDecoder, Uint8Array, Response, JSON, String, Math
   });
@@ -35,25 +35,25 @@ function request(body, token = 'test-access-token') {
 }
 
 test('AI worker JavaScript parses as a module after export wrapper removal', () => {
-  assert.match(workerSource, /export default \\{/);
+  assert.match(workerSource, /export default \{/);
   new vm.Script(workerSource.replace('export default', 'const worker ='));
 });
 
 test('AI worker uses the Cloudflare AI binding and a free-plan model without provider API keys', () => {
-  assert.match(workerSource, /env\\.AI\\.run/);
-  assert.match(workerSource, /@cf\\/google\\/gemma-4-26b-a4b-it/);
-  assert.match(workerSource, /env\\.SAKINA_ACCESS_TOKEN/);
-  assert.doesNotMatch(workerSource, /OPENAI_API_KEY|api\\.openai\\.com/);
+  assert.match(workerSource, /env\.AI\.run/);
+  assert.match(workerSource, /@cf\/google\/gemma-4-26b-a4b-it/);
+  assert.match(workerSource, /env\.SAKINA_ACCESS_TOKEN/);
+  assert.doesNotMatch(workerSource, /OPENAI_API_KEY|api\.openai\.com/);
 });
 
 test('AI worker validates origin, auth, message count and message size', () => {
   for (const pattern of [
-    /allowed\\.includes\\(origin\\)/,
+    /allowed\.includes\(origin\)/,
     /X-Sakina-Token/,
     /MAX_BODY_BYTES/,
     /MAX_MESSAGES/,
     /MAX_MESSAGE_CHARS/,
-    /messages\\[messages\\.length - 1\\]\\.role !== "user"/
+    /messages\[messages\.length - 1\]\.role !== "user"/
   ]) assert.match(workerSource, pattern);
 });
 

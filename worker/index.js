@@ -1,6 +1,7 @@
 const MAX_BODY_BYTES = 48 * 1024;
 const MAX_MESSAGES = 24;
 const MAX_MESSAGE_CHARS = 4000;
+const MODEL_ID = "@cf/google/gemma-4-26b-a4b-it";
 
 const SAKINA_INSTRUCTIONS = `أنت سكينة، مساعد عربي هادئ وعميق وصريح بلطف.
 - تحدث بالعربية وبأسلوب طبيعي واضح، وكن صريحًا بلا قسوة أو مجاملة مضللة.
@@ -30,7 +31,7 @@ function constantTimeEqual(a, b) {
   return diff === 0;
 }
 
-function corsHeaders(origin, allowedOrigins) {
+function corsHeaders(origin) {
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -66,18 +67,16 @@ async function readLimitedText(request, limit) {
   return new TextDecoder().decode(bytes);
 }
 
-function extractText(payload) {
-  if (typeof payload.output_text === "string" && payload.output_text.trim()) {
-    return payload.output_text.trim();
+function extractText(result) {
+  if (typeof result?.response === "string" && result.response.trim()) return result.response.trim();
+  if (typeof result?.output_text === "string" && result.output_text.trim()) return result.output_text.trim();
+  const choiceText = result?.choices?.[0]?.message?.content;
+  if (typeof choiceText === "string" && choiceText.trim()) return choiceText.trim();
+  if (Array.isArray(choiceText)) {
+    const text = choiceText.map(part => part?.text || "").join("").trim();
+    if (text) return text;
   }
-  const parts = [];
-  for (const item of payload.output || []) {
-    if (item.type !== "message" || item.role !== "assistant") continue;
-    for (const content of item.content || []) {
-      if (content.type === "output_text" && typeof content.text === "string") parts.push(content.text);
-    }
-  }
-  return parts.join("\n").trim();
+  return "";
 }
 
 export default {
@@ -86,10 +85,10 @@ export default {
     const allowed = String(env.ALLOWED_ORIGINS || "").split(",").map(x => x.trim()).filter(Boolean);
     if (!origin || !allowed.includes(origin)) return json({ error: "Origin not allowed" }, 403);
 
-    const headers = corsHeaders(origin, allowed);
+    const headers = corsHeaders(origin);
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
     if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, headers);
-    if (!env.OPENAI_API_KEY || !env.SAKINA_ACCESS_TOKEN) {
+    if (!env.AI || typeof env.AI.run !== "function" || !env.SAKINA_ACCESS_TOKEN) {
       return json({ error: "Server is not configured" }, 503, headers);
     }
     if (!constantTimeEqual(request.headers.get("X-Sakina-Token") || "", env.SAKINA_ACCESS_TOKEN)) {
@@ -111,7 +110,7 @@ export default {
     if (!body || !Array.isArray(body.messages) || body.messages.length < 1 || body.messages.length > MAX_MESSAGES) {
       return json({ error: "Invalid message list" }, 400, headers);
     }
-    const messages = [];
+    const messages = [{ role: "system", content: SAKINA_INSTRUCTIONS }];
     for (const message of body.messages) {
       if (!message || !["user", "assistant"].includes(message.role) ||
           typeof message.text !== "string" || !message.text.trim() ||
@@ -125,29 +124,16 @@ export default {
     }
 
     try {
-      const upstream = await fetch("https://api.openai.com/v1/responses", {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + env.OPENAI_API_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: env.OPENAI_MODEL || "gpt-5.5",
-          instructions: SAKINA_INSTRUCTIONS,
-          input: messages,
-          max_output_tokens: 700,
-          store: false,
-        }),
+      const result = await env.AI.run(MODEL_ID, {
+        messages,
+        max_tokens: 700,
+        store: false,
       });
-      const result = await upstream.json().catch(() => ({}));
-      if (!upstream.ok) {
-        return json({ error: "AI provider request failed", providerStatus: upstream.status }, 502, headers);
-      }
       const reply = extractText(result);
       if (!reply) return json({ error: "Empty AI response" }, 502, headers);
       return json({ reply }, 200, headers);
     } catch {
-      return json({ error: "AI service is temporarily unavailable" }, 502, headers);
+      return json({ error: "AI service is temporarily unavailable. Check the Workers AI free quota and model availability." }, 502, headers);
     }
   },
 };

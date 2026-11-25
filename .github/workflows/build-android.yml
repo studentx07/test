@@ -17,6 +17,7 @@ on:
       - 'package.json'
       - 'scripts/**'
       - 'assets/**'
+      - 'test/**'
       - '.github/workflows/build-android.yml'
 
 permissions:
@@ -43,6 +44,9 @@ jobs:
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+
+      - name: Run regression tests
+        run: npm test
 
       - name: Prepare web assets
         run: npm run prepare:web

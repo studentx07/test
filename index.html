@@ -601,9 +601,9 @@ $("na").onclick=function(){
   toast("تم إضافة المجال: "+v);
 };
 rcat();
-function go(t){document.querySelector('#nv [data-t="'+t+'"]').click()}
 function sync(t){[].forEach.call($("bn").children,function(b){var g=b.getAttribute("data-g");b.className=(g==t||(g=="m"&&["w","gl","wv","r","e","d","th","gm","cal","trash","hist","chat"].indexOf(t)>-1))?"on":""})}
-$("nv").addEventListener("click",function(e){var t=e.target.getAttribute("data-t");if(t){sync(t);cur=t;$("mn").style.display="none";window.scrollTo(0,0);try{if(location.hash.slice(1)!=t)location.hash=t}catch(x){}}});
+function go(t){var target=$(t);if(!target||target.tagName!=="SECTION")return;[].forEach.call(document.querySelectorAll("main>section"),function(sec){sec.classList.toggle("on",sec===target)});sync(t);cur=t;$("mn").style.display="none";window.scrollTo(0,0);try{if(location.hash.slice(1)!==t)location.hash=t}catch(x){}}
+$("nv").addEventListener("click",function(e){var b=e.target.closest("[data-t]");if(b)go(b.getAttribute("data-t"))});
 $("bn").onclick=function(e){var b=e.target.closest("button");if(!b)return;var g=b.getAttribute("data-g");
  if(g=="m"){$("mn").style.display=$("mn").style.display=="block"?"none":"block";return}go(g)};
 $("mn").onclick=function(e){var b=e.target.closest("button");if(b)go(b.getAttribute("data-g"))};

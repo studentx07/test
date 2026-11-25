@@ -453,11 +453,11 @@ function rtxt(r){var l=["📅 التاريخ: "+fmt(r.ts),"📍 الموقف: "+
  if(r.d&&r.d.length)l.push("🧩 نمط التفكير: "+r.d.join("، "));if(r.a)l.push("🔄 الفكرة البديلة: "+r.a);return l.join("\n")}
 $("ct").onclick=function(){cp(rows.length?rows.map(function(r){return rtxt(r)}).join("\n\n──────────\n\n"):"")};
 $("rs").onclick=function(){(async function(){try{var d=await decodeBackupText($("bk").value),R=Array.isArray(d)?d:d.rows;if(!Array.isArray(R))throw 0;
- var n=function(v){v=+v;return isNaN(v)?0:Math.min(10,Math.max(0,v))},have=Object.create(null),add=0;
+ var originalRows=rows.slice(),n=function(v){v=+v;return isNaN(v)?0:Math.min(10,Math.max(0,v))},have=Object.create(null),add=0;
  function recordKey(r){return JSON.stringify([Number(r.ts)||0,String(r.s||""),String(r.t||""),String(r.m||""),String(r.i==null?"":r.i),String(r.a||""),String(r.i2==null?"":r.i2)])}
  rows.forEach(function(r){have[recordKey(r)]=1});
  R.forEach(function(r){if(r&&Number.isFinite(Number(r.ts))&&r.s){r.i=n(r.i);if(r.i2!=null)r.i2=n(r.i2);var key=recordKey(r);if(!have[key]){have[key]=1;rows.push(r);add++}}});
- rows.sort(function(a,b){return b.ts-a.ts});save();
+ rows.sort(function(a,b){return b.ts-a.ts});if(!save()){rows=originalRows;throw new Error("تعذر حفظ التسجيلات المسترجعة؛ لم يكتمل الاسترجاع")}
  if(!Array.isArray(d)){var hv=Object.create(null);nts.forEach(function(x){hv[String(x.ts)+"|"+String(x.k)+"|"+String(x.x)]=1});(Array.isArray(d.notes)?d.notes:[]).forEach(function(x){var key=x&&String(x.ts)+"|"+String(x.k)+"|"+String(x.x);if(x&&x.ts&&x.x&&!hv[key]){nts.push(x);hv[key]=1}});nts.sort(function(a,b){return b.ts-a.ts});nsv();
   var q=d.prod&&typeof d.prod==="object"?d.prod:{};try{for(var gk in d.g||{})gbs(gk,+d.g[gk],gk!="a")}catch(e){}
   function mergeTasks(source,target){(Array.isArray(source)?source:[]).forEach(function(t){if(!t||!t.ts||!t.t)return;var exists=target.some(function(z){return (t.id!=null&&z.id===t.id)||(z.ts===t.ts&&z.t===t.t)});if(!exists)target.push(t)})}

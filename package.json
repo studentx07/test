@@ -4,6 +4,7 @@
   "private": true,
   "description": "Sakina app Android build project",
   "scripts": {
+    "test": "node --test test/*.test.js",
     "android:add": "cap add android",
     "android:sync": "cap sync android"
   },

@@ -5,7 +5,7 @@
   "description": "Sakina app Android build project",
   "scripts": {
     "prepare:web": "node scripts/prepare-web.js",
-    "test": "node --test",
+    "test": "node --test test/*.test.js",
     "android:add": "cap add android",
     "android:sync": "cap sync android"
   },

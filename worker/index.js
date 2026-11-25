@@ -40,6 +40,32 @@ function corsHeaders(origin, allowedOrigins) {
   };
 }
 
+async function readLimitedText(request, limit) {
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const chunks = [];
+  let size = 0;
+  while (true) {
+    const part = await reader.read();
+    if (part.done) break;
+    size += part.value.byteLength;
+    if (size > limit) {
+      await reader.cancel();
+      const error = new Error("Request too large");
+      error.code = "TOO_LARGE";
+      throw error;
+    }
+    chunks.push(part.value);
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(bytes);
+}
+
 function extractText(payload) {
   if (typeof payload.output_text === "string" && payload.output_text.trim()) {
     return payload.output_text.trim();
@@ -75,10 +101,10 @@ export default {
 
     let body;
     try {
-      const raw = await request.text();
-      if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) return json({ error: "Request too large" }, 413, headers);
+      const raw = await readLimitedText(request, MAX_BODY_BYTES);
       body = JSON.parse(raw);
-    } catch {
+    } catch (error) {
+      if (error && error.code === "TOO_LARGE") return json({ error: "Request too large" }, 413, headers);
       return json({ error: "Invalid JSON" }, 400, headers);
     }
 

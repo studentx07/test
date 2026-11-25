@@ -803,7 +803,7 @@ function chatRender(){
 function mergeChatSessions(incoming){var known={};chatSessions.forEach(function(c){known[c.id]=c});incoming.forEach(function(c){if(!c||!c.id||!Array.isArray(c.messages))return;var target=known[c.id];if(!target){chatSessions.push(c);known[c.id]=c;return}var seen={};target.messages.forEach(function(m){if(m&&m.id)seen[m.id]=1});c.messages.forEach(function(m){if(m&&m.id&&!seen[m.id]){target.messages.push(m);seen[m.id]=1}})});chatSave();chatRender()}
 $("chatNew").onclick=function(){var c={id:chatId(),createdAt:Date.now(),updatedAt:Date.now(),messages:[]};chatSessions.unshift(c);activeChatId=c.id;chatSave();chatRender();$("chatInput").focus()};
 var CHAT_ENDPOINT_KEY="sakina_ai_endpoint_v1",chatAiEndpoint="",chatAiToken="",chatAiSending=false;
-try{chatAiEndpoint=localStorage.getItem(CHAT_ENDPOINT_KEY)||"";$("chatEndpoint").value=chatAiEndpoint}catch(e){}
+try{chatAiEndpoint=localStorage.getItem(CHAT_ENDPOINT_KEY)||"";$("chatEndpoint").value=chatAiEndpoint;if(chatAiEndpoint)chatAiStatus("رابط الخادم محفوظ. أدخل رمز الوصول مجددًا للاتصال؛ الرمز لا يُحفظ على الجهاز.")}catch(e){}
 function chatAiStatus(message){$("chatAiStatus").textContent=message}
 $("chatConnect").onclick=function(){
  var endpoint=$("chatEndpoint").value.trim(),token=$("chatAccessToken").value.trim();

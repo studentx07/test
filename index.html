@@ -529,7 +529,7 @@ var sp=7;
 function hbx(o){var ks=Object.keys(o).sort(function(a,b){return o[b]-o[a]}).slice(0,6),m=o[ks[0]]||1;return ks.map(function(k){return "<div class='hb'><span style='width:92px'>"+esc(k)+"</span><i style='width:"+Math.round(o[k]/m*50)+"%'></i><em>"+o[k]+"</em></div>"}).join("")}
 function bp(){$("sp").onclick=function(e){var b=e.target.closest("button");if(!b)return;sp=+b.getAttribute("data-p");stats()}}
 function stats(){
- var s=$("sx"),now=Date.now(),all=rows,cut=sp?now-sp*864e5:0,R=all.filter(function(r){return r.ts>=cut}),P2=sp?all.filter(function(r){return r.ts<cut&&r.ts>=cut-sp*864e5}):[];
+ var s=$("sx"),now=Date.now(),all=rows,today=new Date();today.setHours(0,0,0,0);var periodStart=sp?today.getTime()-(sp-1)*864e5:0,cut=periodStart,R=all.filter(function(r){return Number(r.ts)>=cut&&Number(r.ts)<=now}),P2=sp?all.filter(function(r){return Number(r.ts)<periodStart&&Number(r.ts)>=periodStart-sp*864e5}):[];
  function av(a){return a.length?a.reduce(function(t,r){return t+ +r.i},0)/a.length:0}
  function am(a){return a.reduce(function(t,v){return t+v},0)/a.length}
  var head="<div class='chips' id='sp' style='margin:0 0 12px'>"+[[7,"7 أيام"],[30,"30 يوم"],[0,"الكل"]].map(function(x){return "<button type='button' data-p='"+x[0]+"'"+(x[0]==sp?" class='on'":"")+">"+x[1]+"</button>"}).join("")+"</div>";

@@ -76,6 +76,31 @@ test('statistics still show productivity when there are no emotion records', () 
   assert.match(nodes.sx.innerHTML, /<b>4\.0<\/b><span>متوسط المزاج \/5<\/span>/);
 });
 
+test('opening the statistics tab through app navigation renders its content', () => {
+  const entry = html.match(/(function onTabEnter\(t\)\{[^\n]*\})/);
+  const navigation = html.match(/(function go\(t\)\{[\s\S]*?)\n\$\("bn"\)\.onclick=/);
+  assert.ok(entry, 'expected shared tab-entry handler');
+  assert.ok(navigation, 'expected app navigation handler');
+  let rendered = false;
+  const section = { tagName: 'SECTION', classList: { toggle() {} } };
+  const context = {
+    $: id => id === 'c' ? section : { style: {} },
+    document: { querySelectorAll: () => [section] },
+    window: { scrollTo() {} },
+    location: { hash: '' },
+    sync() {},
+    cur: 'td',
+    bon: false,
+    rq() {}, tr() {}, hr() {}, pd() {}, bkn() {}, gr() {}, gstart() {}, gmStop() {},
+    wr() {}, rcv() {}, ndraw() {}, bstop() {}, stats() { rendered = true; },
+    draw() {}, hdraw() {}, drawCalendar() {}, drawTrash() {}, chatRender() {}
+  };
+
+  vm.runInNewContext(`${entry[1]};${navigation[1]};go("c");`, context);
+
+  assert.equal(rendered, true);
+});
+
 test('deletion confirmation uses a separate attribute from task checkbox IDs', () => {
   assert.match(html, /function two\(b,fn\)\{if\(b\.getAttribute\("data-confirm"\)\)/);
   assert.match(html, /data-c='"\+esc\(t\.id\)\+"/);

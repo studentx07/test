@@ -14,5 +14,15 @@
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^7.0.0"
+  },
+  "capacitor": {
+    "assets": {
+      "icon": {
+        "src": "www/icon-512.png"
+      },
+      "splash": {
+        "src": "www/icon-512.png"
+      }
+    }
   }
 }

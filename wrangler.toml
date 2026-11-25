@@ -1,0 +1,8 @@
+name = "sakina-ai"
+main = "worker/index.js"
+compatibility_date = "2026-11-25"
+
+[vars]
+OPENAI_MODEL = "gpt-5.5"
+# Set ALLOWED_ORIGINS in the Worker environment to exact app origins, comma-separated.
+# Store OPENAI_API_KEY and SAKINA_ACCESS_TOKEN as Worker secrets, never in this repository.

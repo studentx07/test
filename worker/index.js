@@ -71,7 +71,7 @@ function extractText(result) {
   // Handle top-level array (some CF AI models return array directly)
   if (Array.isArray(result) && result[0]) return extractText(result[0]);
   // Handle nested .result wrapper
-  if (result?.result !== undefined && result?.result !== null && typeof result.result !== "string") return extractText(result.result);
+  if (result?.result !== undefined && result?.result !== null) return extractText(result.result);
   // Legacy CF AI format
   if (typeof result?.response === "string" && result.response.trim()) return result.response.trim();
   if (typeof result?.output_text === "string" && result.output_text.trim()) return result.output_text.trim();

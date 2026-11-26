@@ -42,6 +42,30 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Configure Gradle Maven mirror
+        run: |
+          mkdir -p ~/.gradle/init.d
+          cat << 'EOF' > ~/.gradle/init.d/maven-mirror.gradle
+          def prependMirror = { repos ->
+              def mirror = repos.maven { url = "https://maven-central.storage-download.googleapis.com/maven2/" }
+              repos.remove(mirror)
+              repos.add(0, mirror)
+          }
+          gradle.settingsEvaluated { settings ->
+              prependMirror(settings.pluginManagement.repositories)
+              prependMirror(settings.dependencyResolutionManagement.repositories)
+          }
+          allprojects {
+              buildscript {
+                  prependMirror(repositories)
+              }
+              prependMirror(repositories)
+          }
+          EOF
+
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 

@@ -88,7 +88,8 @@ test('AI worker sends the system prompt and chat to the selected Workers AI mode
   assert.deepEqual(await response.json(), { reply: 'أهلًا، أنا سكينة.' });
   assert.equal(captured.model, '@cf/google/gemma-4-26b-a4b-it');
   assert.equal(captured.input.store, false);
-  assert.equal(captured.input.max_tokens, 700);
+  assert.equal(captured.input.max_tokens, 1500);
+  assert.deepEqual(captured.input.chat_template_kwargs, { enable_thinking: false });
   assert.equal(captured.input.messages.length, 4);
   assert.equal(captured.input.messages[0].role, 'system');
   assert.match(captured.input.messages[0].content, /أنت سكينة/);
@@ -104,4 +105,26 @@ test('AI worker does not expose Workers AI error details', async () => {
   assert.equal(response.status, 502);
   assert.match(data.error, /free quota/);
   assert.equal(JSON.stringify(data).includes('private provider detail'), false);
+});
+
+test('AI worker extracts nested string responses from Workers AI', async () => {
+  const worker = loadWorker();
+  const testEnv = { ...env, AI: { run: async () => ({ result: { result: 'رد متداخل' } }) } };
+  const response = await worker.fetch(request({
+    messages: [{ role: 'user', text: 'مرحبا' }]
+  }), testEnv);
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { reply: 'رد متداخل' });
+});
+
+test('AI worker extracts OpenAI-compatible content arrays', async () => {
+  const worker = loadWorker();
+  const testEnv = { ...env, AI: { run: async () => ({
+    choices: [{ message: { content: [{ type: 'text', text: 'رد ' }, { type: 'text', text: 'مقسم' }] } }]
+  }) } };
+  const response = await worker.fetch(request({
+    messages: [{ role: 'user', text: 'مرحبا' }]
+  }), testEnv);
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { reply: 'رد مقسم' });
 });

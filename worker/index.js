@@ -1,6 +1,7 @@
 const MAX_BODY_BYTES = 48 * 1024;
 const MAX_MESSAGES = 24;
 const MAX_MESSAGE_CHARS = 4000;
+const MAX_OUTPUT_TOKENS = [4096, 8192]; // first attempt, then one retry if empty
 const MODEL_ID = "@cf/google/gemma-4-26b-a4b-it";
 
 const SAKINA_INSTRUCTIONS = `أنت سكينة، مساعد عربي هادئ وعميق وصريح بلطف.
@@ -135,17 +136,25 @@ export default {
     }
 
     try {
-      const result = await env.AI.run(MODEL_ID, {
-        messages,
-        max_tokens: 1500,
-        store: false,
-        // Disable Gemma 4's built-in thinking mode — it consumes all tokens
-        // before writing the visible response, causing empty replies on multi-turn.
-        chat_template_kwargs: { enable_thinking: false },
-      });
-      const reply = extractText(result);
-      if (!reply) return json({ error: "Empty AI response" }, 502, headers);
-      return json({ reply }, 200, headers);
+      for (const maxTokens of MAX_OUTPUT_TOKENS) {
+        const result = await env.AI.run(MODEL_ID, {
+          messages,
+          max_completion_tokens: maxTokens,
+          store: false,
+          // Disable Gemma 4's thinking mode: hidden reasoning counts against the
+          // output budget and can leave the visible reply empty.
+          chat_template_kwargs: { enable_thinking: false },
+        });
+        const reply = extractText(result);
+        if (reply) return json({ reply }, 200, headers);
+        // Metadata only: never log conversation text.
+        console.warn("Empty AI response", JSON.stringify({
+          maxTokens,
+          finishReason: result?.choices?.[0]?.finish_reason ?? null,
+          usage: result?.usage ?? null,
+        }));
+      }
+      return json({ error: "Empty AI response" }, 502, headers);
     } catch {
       return json({ error: "AI service is temporarily unavailable. Check the Workers AI free quota and model availability." }, 502, headers);
     }

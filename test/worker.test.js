@@ -12,7 +12,8 @@ const workerSource = fs.readFileSync(path.join(root, 'worker', 'index.js'), 'utf
 function loadWorker() {
   const source = workerSource.replace('export default', 'const worker =') + '\nworker;';
   return vm.runInNewContext(source, {
-    TextEncoder, TextDecoder, Uint8Array, Response, JSON, String, Math
+    TextEncoder, TextDecoder, Uint8Array, Response, JSON, String, Math,
+    console: { warn() {} }
   });
 }
 
@@ -88,8 +89,8 @@ test('AI worker sends the system prompt and chat to the selected Workers AI mode
   assert.deepEqual(await response.json(), { reply: 'أهلًا، أنا سكينة.' });
   assert.equal(captured.model, '@cf/google/gemma-4-26b-a4b-it');
   assert.equal(captured.input.store, false);
-  assert.equal(captured.input.max_tokens, 1500);
-  assert.deepEqual(captured.input.chat_template_kwargs, { enable_thinking: false });
+  assert.equal(captured.input.max_completion_tokens, 4096);
+  assert.equal(captured.input.chat_template_kwargs.enable_thinking, false);
   assert.equal(captured.input.messages.length, 4);
   assert.equal(captured.input.messages[0].role, 'system');
   assert.match(captured.input.messages[0].content, /أنت سكينة/);
@@ -127,4 +128,32 @@ test('AI worker extracts OpenAI-compatible content arrays', async () => {
   }), testEnv);
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { reply: 'رد مقسم' });
+});
+
+test('AI worker retries once with a larger budget when the reply is empty', async () => {
+  const budgets = [];
+  const worker = loadWorker();
+  const testEnv = { ...env, AI: { run: async (model, input) => {
+    budgets.push(input.max_completion_tokens);
+    return budgets.length === 1
+      ? { choices: [{ message: { content: null }, finish_reason: 'length' }] }
+      : { choices: [{ message: { content: 'رد بعد المحاولة' } }] };
+  } } };
+  const response = await worker.fetch(request({
+    messages: [{ role: 'user', text: 'مرحبا' }]
+  }), testEnv);
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { reply: 'رد بعد المحاولة' });
+  assert.deepEqual(budgets, [4096, 8192]);
+});
+
+test('AI worker reports an empty response after two attempts', async () => {
+  let calls = 0;
+  const worker = loadWorker();
+  const testEnv = { ...env, AI: { run: async () => { calls++; return {}; } } };
+  const response = await worker.fetch(request({
+    messages: [{ role: 'user', text: 'مرحبا' }]
+  }), testEnv);
+  assert.equal(response.status, 502);
+  assert.equal(calls, 2);
 });

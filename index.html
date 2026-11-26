@@ -74,9 +74,13 @@ summary{font-family:"Reem Kufi",Cairo,sans-serif;font-size:1.1rem}
 #bn button{flex:1;background:none;color:var(--bg);opacity:.7;border:0;box-shadow:none;padding:5px 0;border-radius:18px;display:flex;flex-direction:column;align-items:center;font-size:1.25rem;line-height:1.3}
 #bn button span{font-size:.7rem;font-weight:800}
 #bn button.on{background:var(--ac);opacity:1}
-#mn{display:none;max-height:60vh;overflow-y:auto;position:fixed;right:12px;left:12px;max-width:560px;margin:0 auto;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:6;background:var(--sf);border:var(--b);border-radius:18px;padding:6px;box-shadow:var(--sh)}
-#mn button{display:block;width:100%;text-align:right;background:none;color:var(--tx);border:0;box-shadow:none;padding:12px;font-weight:800}
-#mn button:active{background:var(--ac2);transform:none}
+#mn{display:none;max-height:68vh;overflow-y:auto;position:fixed;right:12px;left:12px;max-width:560px;margin:0 auto;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:6;background:var(--sf);border:var(--b);border-radius:18px;padding:12px;box-shadow:var(--sh)}
+.mn-cat{font-size:.78rem;font-weight:800;color:var(--mu);margin:12px 4px 6px;padding-bottom:4px;border-bottom:1px solid var(--bd)}
+.mn-cat:first-child{margin-top:2px}
+.mn-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#mn .mn-grid button{display:flex;align-items:center;gap:8px;width:100%;text-align:right;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:14px;box-shadow:none;padding:10px 12px;font-weight:700;font-size:.86rem;line-height:1.3}
+#mn .mn-grid button.on{background:var(--ac2);color:var(--ac);border-color:var(--ac);font-weight:800}
+#mn .mn-grid button:active{background:var(--ac2);transform:scale(.98)}
 #lk{display:none;position:fixed;inset:0;z-index:9;background:var(--bg);padding:20vh 24px 0;text-align:center}
 html.lk #lk{display:block}html.lk main,html.lk #bn{visibility:hidden}
 .toast{position:fixed;bottom:calc(96px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);border:2px solid var(--bg);padding:8px 18px;border-radius:20px;font-weight:800;opacity:0;transition:opacity .2s;pointer-events:none;z-index:10}
@@ -291,7 +295,7 @@ button[disabled]{opacity:.4;pointer-events:none}
     </div>
   </div>
 </div>
-<div id="mn"><button data-g="w">📝 كتابة حرة وامتنان</button><button data-g="gl">🎯 الأهداف</button><button data-g="wv">📈 المراجعة الأسبوعية</button><button data-g="gm">🧩 ألعاب ذكاء</button><button data-g="cal">🗓️ التقويم</button><button data-g="trash">🗑️ سلة المحذوفات</button><button data-g="hist">📜 سجل التغييرات</button><button data-g="chat">💬 محادثة سكينة</button><button data-g="r">🌱 التعافي</button><button data-g="e">🌬️ تنفّس</button><button data-g="d">💾 نسخ احتياطي وقفل</button><button data-g="th">🎨 المظهر والألوان</button></div>
+<div id="mn"><div class="mn-cat">🧘 الهدوء والدعم</div><div class="mn-grid"><button data-g="chat">💬 محادثة سكينة</button><button data-g="e">🌬️ تنفّس</button><button data-g="w">📝 كتابة حرة وامتنان</button><button data-g="r">🌱 التعافي</button></div><div class="mn-cat">🎯 التخطيط والذهن</div><div class="mn-grid"><button data-g="gl">🎯 الأهداف</button><button data-g="cal">🗓️ التقويم</button><button data-g="wv">📈 المراجعة الأسبوعية</button><button data-g="gm">🧩 ألعاب ذكاء</button></div><div class="mn-cat">⚙️ الإعدادات والبيانات</div><div class="mn-grid"><button data-g="th">🎨 المظهر والألوان</button><button data-g="d">💾 نسخ احتياطي وقفل</button><button data-g="trash">🗑️ سلة المحذوفات</button><button data-g="hist">📜 سجل التغييرات</button></div></div>
 <div id="bn" role="navigation" aria-label="التنقل الرئيسي"><button data-g="td" class="on">🏠<span>اليوم</span></button><button data-g="a">✏️<span>تسجيل</span></button><button data-g="b">📋<span>الجدول</span></button><button data-g="c">📊<span>إحصائيات</span></button><button data-g="m">☰<span>المزيد</span></button></div>
 <div class="toast" id="to" role="status" aria-live="polite"></div>
 <script>
@@ -617,7 +621,7 @@ $("na").onclick=function(){
   toast("تم إضافة المجال: "+v);
 };
 rcat();
-function sync(t){[].forEach.call($("bn").children,function(b){var g=b.getAttribute("data-g");b.className=(g==t||(g=="m"&&["w","gl","wv","r","e","d","th","gm","cal","trash","hist","chat"].indexOf(t)>-1))?"on":""})}
+function sync(t){[].forEach.call($("bn").children,function(b){var g=b.getAttribute("data-g");b.className=(g==t||(g=="m"&&["w","gl","wv","r","e","d","th","gm","cal","trash","hist","chat"].indexOf(t)>-1))?"on":""});[].forEach.call($("mn").querySelectorAll("button[data-g]"),function(b){b.classList.toggle("on",b.getAttribute("data-g")===t)})}
 function onTabEnter(t){if(t=="td"){rq();tr();hr();pd();bkn()}if(t=="gl")gr();if(t=="gm")gstart();if(t!="gm")gmStop();if(t=="wv")wr();if(t=="r")rcv();if(t=="w")ndraw();if(t!="e"&&bon)bstop();if(t=="c")stats();if(t=="b")draw();if(t=="hist")hdraw();if(t=="cal")drawCalendar();if(t=="trash")drawTrash();if(t=="chat")chatRender()}
 function go(t){var target=$(t);if(!target||target.tagName!=="SECTION")return;[].forEach.call(document.querySelectorAll("main>section"),function(sec){sec.classList.toggle("on",sec===target)});onTabEnter(t);sync(t);cur=t;$("mn").style.display="none";window.scrollTo(0,0);try{if(location.hash.slice(1)!==t)location.hash=t}catch(x){}}
 $("bn").onclick=function(e){var b=e.target.closest("button");if(!b)return;var g=b.getAttribute("data-g");

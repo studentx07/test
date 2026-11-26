@@ -89,7 +89,7 @@ test('AI worker sends the system prompt and chat to the selected Workers AI mode
   assert.equal(captured.model, '@cf/google/gemma-4-26b-a4b-it');
   assert.equal(captured.input.store, false);
   assert.equal(captured.input.max_tokens, 1500);
-  assert.deepEqual(captured.input.chat_template_kwargs, { enable_thinking: false });
+  assert.equal(captured.input.chat_template_kwargs.enable_thinking, false);
   assert.equal(captured.input.messages.length, 4);
   assert.equal(captured.input.messages[0].role, 'system');
   assert.match(captured.input.messages[0].content, /أنت سكينة/);

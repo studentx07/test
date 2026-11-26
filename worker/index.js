@@ -68,6 +68,7 @@ async function readLimitedText(request, limit) {
 }
 
 function extractText(result) {
+  if (typeof result === "string" && result.trim()) return result.trim();
   // Handle top-level array (some CF AI models return array directly)
   if (Array.isArray(result) && result[0]) return extractText(result[0]);
   // Handle nested .result wrapper

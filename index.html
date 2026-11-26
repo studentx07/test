@@ -75,6 +75,11 @@ summary{font-family:"Reem Kufi",Cairo,sans-serif;font-size:1.1rem}
 #bn button span{font-size:.7rem;font-weight:800}
 #bn button.on{background:var(--ac);opacity:1}
 #mn{display:none;max-height:68vh;overflow-y:auto;position:fixed;right:12px;left:12px;max-width:560px;margin:0 auto;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:6;background:var(--sf);border:var(--b);border-radius:18px;padding:12px;box-shadow:var(--sh)}
+#subnav{display:none;gap:8px;overflow-x:auto;margin:0 0 14px;padding:2px 0;scrollbar-width:none}
+#subnav::-webkit-scrollbar{display:none}
+#subnav.on{display:flex}
+#subnav button{flex-shrink:0;white-space:nowrap;background:var(--sf);color:var(--tx);border:1px solid var(--bd);border-radius:999px;padding:6px 14px;font-size:.86rem;font-weight:700;box-shadow:none}
+#subnav button.on{background:var(--ac);color:var(--bg);border-color:var(--ac);font-weight:800}
 .mn-cat{font-size:.78rem;font-weight:800;color:var(--mu);margin:12px 4px 6px;padding-bottom:4px;border-bottom:1px solid var(--bd)}
 .mn-cat:first-child{margin-top:2px}
 .mn-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
@@ -199,6 +204,7 @@ button[disabled]{opacity:.4;pointer-events:none}
 <p class="sub">اكتب الموقف والفكرة والشعور أول بأول، وراجعهم وشوف الأنماط.</p>
 <div id="sk"></div>
 <nav id="nv"><button data-t="a" class="on">تسجيل</button><button data-t="b">الجدول</button><button data-t="c">إحصائيات</button><button data-t="d">نسخ احتياطي</button><button data-t="e">تنفّس</button><button data-t="w">كتابة حرة</button><button data-t="r">التعافي</button><button data-t="th">المظهر</button><button data-t="td">اليوم</button><button data-t="gl">أهداف</button><button data-t="wv">مراجعة</button><button data-t="gm">ألعاب</button><button data-t="cal">التقويم</button><button data-t="trash">سلة المحذوفات</button><button data-t="chat">محادثة سكينة</button><button data-t="hist">سجل التغييرات</button></nav>
+<div id="subnav" role="navigation" aria-label="الأقسام الفرعية"></div>
 
 <section id="a"><form id="f" class="card">
 <label>الموقف — إيه اللي حصل؟<textarea id="s" required placeholder="مثال: صاحبي ما ردش على رسالتي"></textarea></label>
@@ -295,8 +301,8 @@ button[disabled]{opacity:.4;pointer-events:none}
     </div>
   </div>
 </div>
-<div id="mn"><div class="mn-cat">🧘 الهدوء والدعم</div><div class="mn-grid"><button data-g="chat">💬 محادثة سكينة</button><button data-g="e">🌬️ تنفّس</button><button data-g="w">📝 كتابة حرة وامتنان</button><button data-g="r">🌱 التعافي</button></div><div class="mn-cat">🎯 التخطيط والذهن</div><div class="mn-grid"><button data-g="gl">🎯 الأهداف</button><button data-g="cal">🗓️ التقويم</button><button data-g="wv">📈 المراجعة الأسبوعية</button><button data-g="gm">🧩 ألعاب ذكاء</button></div><div class="mn-cat">⚙️ الإعدادات والبيانات</div><div class="mn-grid"><button data-g="th">🎨 المظهر والألوان</button><button data-g="d">💾 نسخ احتياطي وقفل</button><button data-g="trash">🗑️ سلة المحذوفات</button><button data-g="hist">📜 سجل التغييرات</button></div></div>
-<div id="bn" role="navigation" aria-label="التنقل الرئيسي"><button data-g="td" class="on">🏠<span>اليوم</span></button><button data-g="a">✏️<span>تسجيل</span></button><button data-g="b">📋<span>الجدول</span></button><button data-g="c">📊<span>إحصائيات</span></button><button data-g="m">☰<span>المزيد</span></button></div>
+<div id="mn"><div class="mn-cat">🧘 راحة وتعافي</div><div class="mn-grid"><button data-g="e">🌬️ تنفّس</button><button data-g="r">🌱 التعافي</button><button data-g="gm">🧩 ألعاب ذكاء</button></div><div class="mn-cat">⚙️ الإعدادات والبيانات</div><div class="mn-grid"><button data-g="th">🎨 المظهر</button><button data-g="d">💾 النسخ والقفل</button><button data-g="trash">🗑️ المحذوفات</button><button data-g="hist">📜 سجل التغييرات</button></div></div>
+<div id="bn" role="navigation" aria-label="التنقل الرئيسي"><button data-g="td" class="on">🏠<span>اليوم</span></button><button data-g="grp_journal">📔<span>يومياتي</span></button><button data-g="chat">💬<span>سكينة</span></button><button data-g="grp_progress">📈<span>تقدّمي</span></button><button data-g="m">☰<span>المزيد</span></button></div>
 <div class="toast" id="to" role="status" aria-live="polite"></div>
 <script>
 var K="mashaeri_v1",rows=[],EM=["قلق","حزن","غضب","خوف","ذنب","خجل","إحباط","وحدة","توتر","غيرة","ملل","ارتباك","خيبة أمل","فرح","هدوء","فخر","امتنان","حب"],
@@ -621,11 +627,35 @@ $("na").onclick=function(){
   toast("تم إضافة المجال: "+v);
 };
 rcat();
-function sync(t){[].forEach.call($("bn").children,function(b){var g=b.getAttribute("data-g");b.className=(g==t||(g=="m"&&["w","gl","wv","r","e","d","th","gm","cal","trash","hist","chat"].indexOf(t)>-1))?"on":""});[].forEach.call($("mn").querySelectorAll("button[data-g]"),function(b){b.classList.toggle("on",b.getAttribute("data-g")===t)})}
+var NAV_GROUPS={
+  grp_journal:[["a","✏️ تسجيل"],["b","📋 الجدول"],["w","📝 كتابة حرة"]],
+  grp_progress:[["c","📊 إحصائيات"],["cal","🗓️ التقويم"],["wv","📈 الأسبوع"],["gl","🎯 الأهداف"]],
+  grp_settings:[["th","🎨 المظهر"],["d","💾 النسخ"],["trash","🗑️ المحذوفات"],["hist","📜 السجل"]]
+};
+var lastTab={};
+function getNavGroup(t){for(var k in NAV_GROUPS){if(NAV_GROUPS[k].some(function(item){return item[0]===t}))return k}return null}
+function sync(t){
+  var grp=getNavGroup(t);
+  if(grp)lastTab[grp]=t;
+  [].forEach.call($("bn").children,function(b){
+    var g=b.getAttribute("data-g");
+    var active=(g===t)||(g==="grp_journal"&&grp==="grp_journal")||(g==="grp_progress"&&grp==="grp_progress")||(g==="m"&&["e","r","gm","th","d","trash","hist"].indexOf(t)>-1);
+    b.className=active?"on":"";
+  });
+  [].forEach.call($("mn").querySelectorAll("button[data-g]"),function(b){b.classList.toggle("on",b.getAttribute("data-g")===t)});
+  var sn=$("subnav");
+  if(grp&&NAV_GROUPS[grp]){
+    sn.innerHTML=NAV_GROUPS[grp].map(function(item){return "<button type='button' data-g='"+item[0]+"'"+(item[0]===t?" class='on'":"")+">"+item[1]+"</button>"}).join("");
+    sn.className="on";
+  }else{sn.innerHTML="";sn.className="";}
+}
 function onTabEnter(t){if(t=="td"){rq();tr();hr();pd();bkn()}if(t=="gl")gr();if(t=="gm")gstart();if(t!="gm")gmStop();if(t=="wv")wr();if(t=="r")rcv();if(t=="w")ndraw();if(t!="e"&&bon)bstop();if(t=="c")stats();if(t=="b")draw();if(t=="hist")hdraw();if(t=="cal")drawCalendar();if(t=="trash")drawTrash();if(t=="chat")chatRender()}
 function go(t){var target=$(t);if(!target||target.tagName!=="SECTION")return;[].forEach.call(document.querySelectorAll("main>section"),function(sec){sec.classList.toggle("on",sec===target)});onTabEnter(t);sync(t);cur=t;$("mn").style.display="none";window.scrollTo(0,0);try{if(location.hash.slice(1)!==t)location.hash=t}catch(x){}}
 $("bn").onclick=function(e){var b=e.target.closest("button");if(!b)return;var g=b.getAttribute("data-g");
- if(g=="m"){$("mn").style.display=$("mn").style.display=="block"?"none":"block";return}go(g)};
+ if(g=="m"){$("mn").style.display=$("mn").style.display=="block"?"none":"block";return}
+ if(NAV_GROUPS[g]){go(lastTab[g]||NAV_GROUPS[g][0][0]);return}
+ go(g)};
+$("subnav").onclick=function(e){var b=e.target.closest("button");if(b)go(b.getAttribute("data-g"))};
 $("mn").onclick=function(e){var b=e.target.closest("button");if(b)go(b.getAttribute("data-g"))};
 var SK=[["أزرق هادي",["#eef2f4","#ffffff","#1d2b33","#68797f","#27607a","#e3eef3","#d2dde2","#b4443a"],["#121c21","#1b2a31","#e5eef2","#93a7af","#74b9d6","#243942","#2f444e","#ee8b80"]],
 ["أخضر نعناع",["#eef4f0","#ffffff","#1e2d26","#66796f","#2f6f55","#e1efe8","#d0e0d6","#b4443a"],["#111c17","#1a2a23","#e4f0ea","#92a99d","#6fcb9f","#21382d","#2c4639","#ee8b80"]],

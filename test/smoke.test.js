@@ -30,7 +30,8 @@ test('calendar, recycle bin, history and backup UI are present', () => {
   }
   for (const page of ['cal', 'trash', 'hist']) {
     assert.match(html, new RegExp(`data-t=["']${page}["']`));
-    assert.match(html, new RegExp(`data-g=["']${page}["']`));
+    // reachable from the "more" menu or from a group tab
+    assert.match(html, new RegExp(`data-g=["']${page}["']|\\["${page}",`));
   }
 });
 

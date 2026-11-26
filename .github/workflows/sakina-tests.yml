@@ -1,0 +1,34 @@
+name: Sakina AI tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "worker/**"
+      - "test/worker.test.js"
+      - "wrangler.toml"
+      - ".github/workflows/sakina-tests.yml"
+  push:
+    branches:
+      - fix/sakina-ai-empty-response
+    paths:
+      - "worker/**"
+      - "test/worker.test.js"
+      - "wrangler.toml"
+      - ".github/workflows/sakina-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm test
+      - name: Check Worker module syntax
+        run: node --input-type=module --check < worker/index.js

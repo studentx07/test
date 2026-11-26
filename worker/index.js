@@ -68,14 +68,24 @@ async function readLimitedText(request, limit) {
 }
 
 function extractText(result) {
+  // Handle top-level array (some CF AI models return array directly)
+  if (Array.isArray(result) && result[0]) return extractText(result[0]);
+  // Handle nested .result wrapper
+  if (result?.result !== undefined && result?.result !== null && typeof result.result !== "string") return extractText(result.result);
+  // Legacy CF AI format
   if (typeof result?.response === "string" && result.response.trim()) return result.response.trim();
   if (typeof result?.output_text === "string" && result.output_text.trim()) return result.output_text.trim();
-  const choiceText = result?.choices?.[0]?.message?.content;
+  // OpenAI-compatible format (Gemma 4 and newer models)
+  const choice = result?.choices?.[0];
+  const choiceText = choice?.message?.content ?? choice?.text;
   if (typeof choiceText === "string" && choiceText.trim()) return choiceText.trim();
   if (Array.isArray(choiceText)) {
-    const text = choiceText.map(part => part?.text || "").join("").trim();
+    const text = choiceText.map(part => part?.text || part?.content || "").join("").trim();
     if (text) return text;
   }
+  // Handle Gemma 4 thinking mode: response may be in choices[0].message.tool_calls or delta
+  const delta = result?.choices?.[0]?.delta?.content;
+  if (typeof delta === "string" && delta.trim()) return delta.trim();
   return "";
 }
 
@@ -126,8 +136,11 @@ export default {
     try {
       const result = await env.AI.run(MODEL_ID, {
         messages,
-        max_tokens: 700,
+        max_tokens: 1500,
         store: false,
+        // Disable Gemma 4's built-in thinking mode — it consumes all tokens
+        // before writing the visible response, causing empty replies on multi-turn.
+        chat_template_kwargs: { enable_thinking: false },
       });
       const reply = extractText(result);
       if (!reply) return json({ error: "Empty AI response" }, 502, headers);

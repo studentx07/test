@@ -211,3 +211,13 @@ test('encrypted backup crypto settings support authenticated round-trip', async 
   );
   await assert.rejects(subtle.decrypt({ name: 'AES-GCM', iv }, wrongKey, encrypted));
 });
+
+test('chat related-message search splits on whitespace and bounds AI payloads', () => {
+  assert.match(html, /\.split\(\/\[\\s،,\.!\?؟؛:\]\+\/\)/);
+  assert.match(html, /function chatFitPayload\(list\)/);
+  assert.match(html, /var txt=\$\("wx"\)\.value\.trim\(\);if\(!txt\)/);
+  assert.match(html, /hlog\("note","إضافة",wty\+": "\+txt\.slice\(0,50\)/);
+  for (const id of ['chatStatusPill', 'chatSettingsPanel', 'chatSearchPanel', 'chatErrorBar', 'chatRememberToken']) {
+    assert.match(html, new RegExp(`id=["']${id}["']`));
+  }
+});

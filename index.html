@@ -301,7 +301,7 @@ button[disabled]{opacity:.4;pointer-events:none}
     </div>
   </div>
 </div>
-<div id="mn"><div class="mn-cat">🧘 راحة وتعافي</div><div class="mn-grid"><button data-g="e">🌬️ تنفّس</button><button data-g="r">🌱 التعافي</button><button data-g="gm">🧩 ألعاب ذكاء</button></div><div class="mn-cat">⚙️ الإعدادات والبيانات</div><div class="mn-grid"><button data-g="th">🎨 المظهر</button><button data-g="d">💾 النسخ والقفل</button><button data-g="trash">🗑️ المحذوفات</button><button data-g="hist">📜 سجل التغييرات</button></div></div>
+<div id="mn"><div class="mn-cat">🧘 راحة وتعافي</div><div class="mn-grid"><button data-g="b">📋 الجدول</button><button data-g="e">🌬️ تنفّس</button><button data-g="r">🌱 التعافي</button><button data-g="gm">🧩 ألعاب ذكاء</button></div><div class="mn-cat">⚙️ الإعدادات والبيانات</div><div class="mn-grid"><button data-g="th">🎨 المظهر</button><button data-g="d">💾 النسخ والقفل</button><button data-g="trash">🗑️ المحذوفات</button><button data-g="hist">📜 سجل التغييرات</button></div></div>
 <div id="bn" role="navigation" aria-label="التنقل الرئيسي"><button data-g="td" class="on">🏠<span>اليوم</span></button><button data-g="grp_journal">📔<span>يومياتي</span></button><button data-g="chat">💬<span>سكينة</span></button><button data-g="grp_progress">📈<span>تقدّمي</span></button><button data-g="m">☰<span>المزيد</span></button></div>
 <div class="toast" id="to" role="status" aria-live="polite"></div>
 <script>
@@ -628,7 +628,7 @@ $("na").onclick=function(){
 };
 rcat();
 var NAV_GROUPS={
-  grp_journal:[["a","✏️ تسجيل"],["b","📋 الجدول"],["w","📝 كتابة حرة"]],
+  grp_journal:[["a","✏️ تسجيل"],["w","📝 كتابة حرة"]],
   grp_progress:[["c","📊 إحصائيات"],["cal","🗓️ التقويم"],["wv","📈 الأسبوع"],["gl","🎯 الأهداف"]],
   grp_settings:[["th","🎨 المظهر"],["d","💾 النسخ"],["trash","🗑️ المحذوفات"],["hist","📜 السجل"]]
 };
@@ -639,7 +639,7 @@ function sync(t){
   if(grp)lastTab[grp]=t;
   [].forEach.call($("bn").children,function(b){
     var g=b.getAttribute("data-g");
-    var active=(g===t)||(g==="grp_journal"&&grp==="grp_journal")||(g==="grp_progress"&&grp==="grp_progress")||(g==="m"&&["e","r","gm","th","d","trash","hist"].indexOf(t)>-1);
+    var active=(g===t)||(g==="grp_journal"&&grp==="grp_journal")||(g==="grp_progress"&&grp==="grp_progress")||(g==="m"&&["b","e","r","gm","th","d","trash","hist"].indexOf(t)>-1);
     b.className=active?"on":"";
   });
   [].forEach.call($("mn").querySelectorAll("button[data-g]"),function(b){b.classList.toggle("on",b.getAttribute("data-g")===t)});
@@ -650,7 +650,7 @@ function sync(t){
   }else{sn.innerHTML="";sn.className="";}
 }
 function onTabEnter(t){if(t=="td"){rq();tr();hr();pd();bkn()}if(t=="gl")gr();if(t=="gm")gstart();if(t!="gm")gmStop();if(t=="wv")wr();if(t=="r")rcv();if(t=="w")ndraw();if(t!="e"&&bon)bstop();if(t=="c")stats();if(t=="b")draw();if(t=="hist")hdraw();if(t=="cal")drawCalendar();if(t=="trash")drawTrash();if(t=="chat")chatRender()}
-function go(t){var target=$(t);if(!target||target.tagName!=="SECTION")return;[].forEach.call(document.querySelectorAll("main>section"),function(sec){sec.classList.toggle("on",sec===target)});onTabEnter(t);sync(t);cur=t;$("mn").style.display="none";window.scrollTo(0,0);try{if(location.hash.slice(1)!==t)location.hash=t}catch(x){}}
+function go(t){var target=$(t);if(!target||target.tagName!=="SECTION")return;[].forEach.call(document.querySelectorAll("main>section"),function(sec){sec.classList.toggle("on",sec===target)});onTabEnter(t);sync(t);cur=t;$("mn").style.display="none";try{if(location.hash.slice(1)!==t){if(typeof history!=="undefined"&&history.replaceState)history.replaceState(null,"","#"+t);else location.hash=t}}catch(x){}window.scrollTo(0,0)}
 $("bn").onclick=function(e){var b=e.target.closest("button");if(!b)return;var g=b.getAttribute("data-g");
  if(g=="m"){$("mn").style.display=$("mn").style.display=="block"?"none":"block";return}
  if(NAV_GROUPS[g]){go(lastTab[g]||NAV_GROUPS[g][0][0]);return}

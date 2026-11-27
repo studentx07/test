@@ -175,6 +175,13 @@ button[disabled]{opacity:.4;pointer-events:none}
   #b td:nth-child(6)::before{content:"البديلة: ";font-weight:800;color:var(--ac)}
   #b td:last-child{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)}
 }
+.rm-prog{height:8px;background:var(--ac2);border-radius:999px;overflow:hidden;margin:10px 0}
+.rm-prog i{display:block;height:100%;background:var(--ac);border-radius:999px;transition:width .25s}
+.rm-step{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--bd)}
+.rm-step:first-child{border-top:0}
+.rm-step input[type=checkbox]{width:18px;height:18px;margin:0;flex-shrink:0}
+.rm-step.done span{text-decoration:line-through;color:var(--mu)}
+.rm-step span{flex:1;overflow-wrap:anywhere}
 @keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 #chat .chat-card{padding:14px}
@@ -218,7 +225,7 @@ button[disabled]{opacity:.4;pointer-events:none}
 <div id="gt" class="sub" style="margin:0"></div><h1>سكينة</h1>
 <p class="sub">اكتب الموقف والفكرة والشعور أول بأول، وراجعهم وشوف الأنماط.</p>
 <div id="sk"></div>
-<nav id="nv"><button data-t="a" class="on">تسجيل</button><button data-t="b">الجدول</button><button data-t="c">إحصائيات</button><button data-t="d">نسخ احتياطي</button><button data-t="e">تنفّس</button><button data-t="w">كتابة حرة</button><button data-t="r">التعافي</button><button data-t="th">المظهر</button><button data-t="td">اليوم</button><button data-t="gl">أهداف</button><button data-t="wv">مراجعة</button><button data-t="gm">ألعاب</button><button data-t="cal">التقويم</button><button data-t="trash">سلة المحذوفات</button><button data-t="chat">محادثة سكينة</button><button data-t="hist">سجل التغييرات</button></nav>
+<nav id="nv"><button data-t="a" class="on">تسجيل</button><button data-t="b">الجدول</button><button data-t="c">إحصائيات</button><button data-t="d">نسخ احتياطي</button><button data-t="e">تنفّس</button><button data-t="w">كتابة حرة</button><button data-t="r">التعافي</button><button data-t="th">المظهر</button><button data-t="td">اليوم</button><button data-t="gl">أهداف</button><button data-t="wv">مراجعة</button><button data-t="gm">ألعاب</button><button data-t="cal">التقويم</button><button data-t="trash">سلة المحذوفات</button><button data-t="chat">محادثة سكينة</button><button data-t="hist">سجل التغييرات</button><button data-t="map">خريطة</button></nav>
 <div id="subnav" role="navigation" aria-label="الأقسام الفرعية"></div>
 
 <section id="a"><form id="f" class="card">
@@ -260,6 +267,7 @@ button[disabled]{opacity:.4;pointer-events:none}
 <div class="card"><h2>مهام اليوم</h2><div class="sub" id="t3" style="margin:0 0 6px"></div><div class="row"><input id="tn" aria-label="مهمة جديدة" placeholder="مهمة جديدة"><button id="ta">إضافة</button></div><div id="tl" style="margin-top:8px"></div></div>
 <div class="card"><h2>عادات اليوم</h2><div id="hl"></div><div class="row" style="margin-top:8px"><input id="hn2" aria-label="عادة جديدة" placeholder="عادة جديدة"><button class="g" id="ha">إضافة</button></div></div></section>
 <section id="gl"><div class="card"><div class="row"><input id="gn" aria-label="هدف جديد" placeholder="هدف جديد (أسبوعي أو شهري)"><button id="ga">إضافة</button></div></div><div id="gll"></div></section>
+<section id="map"><div class="card"><h2>🗺️ خريطة الدراسة</h2><p class="sub">رتّب خطط الدراسة والمواضيع اللي حابب تتعلمها وتابع تقدمك خطوة بخطوة.</p><div class="row" style="flex-wrap:wrap"><input id="rmTitle" aria-label="اسم خطة الدراسة" placeholder="موضوع أو خطة دراسة جديدة (مثال: Python / تجويد)" style="flex:2;min-width:180px"><input id="rmNote" aria-label="ملاحظة للخطة" placeholder="وصف أو هدف الخطة (اختياري)" style="flex:2;min-width:160px"><button type="button" id="rmAdd">إضافة خطة</button></div><div class="chips" id="rmFilter" style="margin-top:12px"><button type="button" data-f="all" class="on">الكل</button><button type="button" data-f="active">قيد الدراسة</button><button type="button" data-f="done">مكتمل</button></div></div><div id="rmList"></div></section>
 <section id="wv"><div id="wvc"></div></section>
 <section id="gm"><div class="card"><h2>ألعاب ذكاء</h2><div class="chips" id="gs"></div><div id="ga2" style="margin-top:14px"></div></div></section>
 <section id="th"><div class="card"><h2>الألوان</h2><div id="sk2" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div></div><div class="card"><h2>الخلفية</h2><div class="chips" id="pt2"></div></div><div class="card"><h2>الوضع</h2><div class="chips" id="md"><button type="button" data-v="auto">📱 تلقائي</button><button type="button" data-v="light">☀️ فاتح</button><button type="button" data-v="dark">🌙 داكن</button></div></div></section>
@@ -474,7 +482,7 @@ function cp(t){if(!t){toast("مفيش بيانات");return}
  function fb(){var a=document.createElement("textarea");a.value=t;a.style.cssText="position:fixed;opacity:0";document.body.appendChild(a);a.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}document.body.removeChild(a);
   if(ok)toast("تم النسخ");else{document.querySelectorAll("#nv button")[3].click();$("bk").value=t;$("bk").select();toast("انسخ النص من الخانة يدويًا")}}
  try{navigator.clipboard.writeText(t).then(function(){toast("تم النسخ")},fb)}catch(e){fb()}}
-function makeBackupData(){return {app:"sakina",version:4,createdAt:Date.now(),rows:rows,notes:nts,prod:P,rec:rg(),cats:CT.slice(7),g:GB,trash:trashItems,h:H,chats:chatSessions}}
+function makeBackupData(){return {app:"sakina",version:4,createdAt:Date.now(),rows:rows,notes:nts,prod:P,rec:rg(),cats:CT.slice(7),g:GB,trash:trashItems,h:H,chats:chatSessions,roadmap:roadmaps}}
 function toBase64(bytes){var s="";for(var i=0;i<bytes.length;i++)s+=String.fromCharCode(bytes[i]);return btoa(s)}
 function fromBase64(s){var raw=atob(s),a=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)a[i]=raw.charCodeAt(i);return a}
 async function deriveBackupKey(password,salt){var material=await crypto.subtle.importKey("raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:250000,hash:"SHA-256"},material,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
@@ -520,7 +528,7 @@ $("rs").onclick=function(){(async function(){try{var d=await decodeBackupText($(
   (d.cats||[]).forEach(function(x){x=String(x).replace(/['"<>&]/g,"");if(x&&CT.indexOf(x)<0)CT.push(x)});try{localStorage.setItem(CK,JSON.stringify(CT.slice(7)))}catch(e){}rcat();
   var seenTrash=Object.create(null);trashItems.forEach(function(x){seenTrash[x.id]=1});(d.trash||[]).forEach(function(x){if(x&&x.id&&!seenTrash[x.id]){trashItems.push(x);seenTrash[x.id]=1}});persistTrash();
   var seenHistory=Object.create(null);H.forEach(function(x){seenHistory[String(x.ts)+"|"+x.type+"|"+x.action+"|"+x.detail]=1});(d.h||d.activity||[]).forEach(function(x){if(!x||!x.ts)return;var record={ts:x.ts,type:x.type||"activity",action:x.action||x.type||"تغيير",detail:x.detail||""},k=String(record.ts)+"|"+record.type+"|"+record.action+"|"+record.detail;if(!seenHistory[k]){H.push(record);seenHistory[k]=1}});H.sort(function(a,b){return Number(b.ts)-Number(a.ts)});H=H.slice(0,500);hsave()}
- draw();ndraw();rq();tr();hr();gr();drawTrash();hdraw();drawCalendar();bkn();if($("c").className=="on")stats();if(Array.isArray(d.chats))mergeChatSessions(d.chats);$("bk").value="";toast("تم دمج النسخة الاحتياطية؛ عناصر جديدة: "+add)}catch(e){toast(e&&e.message&&e.message.indexOf("كلمة مرور")===0?e.message:"النسخة غير صالحة أو كلمة المرور غير صحيحة")}})()};
+ draw();ndraw();rq();tr();hr();gr();drawTrash();hdraw();drawCalendar();bkn();if($("c").className=="on")stats();if(Array.isArray(d.chats))mergeChatSessions(d.chats);if(Array.isArray(d.roadmap)){mergeRoadmaps(d.roadmap);rmDraw()}$("bk").value="";toast("تم دمج النسخة الاحتياطية؛ عناصر جديدة: "+add)}catch(e){toast(e&&e.message&&e.message.indexOf("كلمة مرور")===0?e.message:"النسخة غير صالحة أو كلمة المرور غير صحيحة")}})()};
 function bkn(){var e=$("bkn"),l=0;if(window.stoff){e.style.display="";e.textContent="⚠️ المتصفح مش بيحفظ البيانات في الوضع ده، فأي حاجة تكتبها ممكن تضيع. خد نسخة احتياطية بعد كل مرة.";return}try{l=+localStorage.getItem("mashaeri_lastbk")||0}catch(x){}var dd=Math.floor((Date.now()-l)/864e5);if((rows.length||nts.length)&&dd>=7){e.style.display="";e.textContent="💾 "+(l?"آخر نسخة احتياطية من "+dd+" يوم":"لسه ماخدتش نسخة احتياطية")+". خد نسخة من المزيد ← نسخ احتياطي."}else e.style.display="none"}
 function dk(t){var d=new Date(t);return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate()}
 function skr(){var s={},n=0,tc=0,d=new Date();rows.forEach(function(r){s[dk(r.ts)]=1;if(dk(r.ts)==dk(Date.now()))tc++});
@@ -662,7 +670,7 @@ $("na").onclick=function(){
 rcat();
 var NAV_GROUPS={
   grp_journal:[["a","✏️ تسجيل"],["w","📝 كتابة حرة"]],
-  grp_progress:[["c","📊 إحصائيات"],["cal","🗓️ التقويم"],["wv","📈 الأسبوع"],["gl","🎯 الأهداف"]],
+  grp_progress:[["c","📊 إحصائيات"],["cal","🗓️ التقويم"],["wv","📈 الأسبوع"],["gl","🎯 الأهداف"],["map","🗺️ خريطة"]],
   grp_settings:[["th","🎨 المظهر"],["d","💾 النسخ"],["trash","🗑️ المحذوفات"],["hist","📜 السجل"]]
 };
 var lastTab={};
@@ -682,7 +690,7 @@ function sync(t){
     sn.className="on";
   }else{sn.innerHTML="";sn.className="";}
 }
-function onTabEnter(t){if(t=="td"){rq();tr();hr();pd();bkn()}if(t=="gl")gr();if(t=="gm")gstart();if(t!="gm")gmStop();if(t=="wv")wr();if(t=="r")rcv();if(t=="w")ndraw();if(t!="e"&&bon)bstop();if(t=="c")stats();if(t=="b")draw();if(t=="hist")hdraw();if(t=="cal")drawCalendar();if(t=="trash")drawTrash();if(t=="chat")chatRender()}
+function onTabEnter(t){if(t=="td"){rq();tr();hr();pd();bkn()}if(t=="gl")gr();if(t=="map")rmDraw();if(t=="gm")gstart();if(t!="gm")gmStop();if(t=="wv")wr();if(t=="r")rcv();if(t=="w")ndraw();if(t!="e"&&bon)bstop();if(t=="c")stats();if(t=="b")draw();if(t=="hist")hdraw();if(t=="cal")drawCalendar();if(t=="trash")drawTrash();if(t=="chat")chatRender()}
 var navHistory=[];
 function go(t){var skipHist=arguments[1],target=$(t);if(!target||target.tagName!=="SECTION")return;if(!skipHist&&typeof navHistory!=="undefined"&&cur&&cur!==t){if(navHistory[navHistory.length-1]!==cur)navHistory.push(cur);if(navHistory.length>20)navHistory.shift()}[].forEach.call(document.querySelectorAll("main>section"),function(sec){sec.classList.toggle("on",sec===target)});onTabEnter(t);sync(t);cur=t;$("mn").style.display="none";try{if(location.hash.slice(1)!==t){if(typeof history!=="undefined"&&history.replaceState)history.replaceState(null,"","#"+t);else location.hash=t}}catch(x){}window.scrollTo(0,0)}
 $("bn").onclick=function(e){var b=e.target.closest("button");if(!b)return;var g=b.getAttribute("data-g");
@@ -1084,6 +1092,78 @@ $("gt").textContent=hh<5?"ليلة هادية":hh<12?"صباح الخير":hh<18
 var cur="td";
 function fromHash(){var h=location.hash.slice(1)||"td";if(h!=cur&&document.querySelector('#nv [data-t="'+h+'"]'))go(h)}
 addEventListener("hashchange",fromHash);if(location.hash)fromHash();
+var RMK="mashaeri_roadmap_v1",roadmaps=[],rmFilterMode="all";
+try{var rmRaw=JSON.parse(localStorage.getItem(RMK)||"[]");if(Array.isArray(rmRaw))roadmaps=rmRaw.filter(function(x){return x&&typeof x==="object"&&x.title}).map(function(x){return{id:String(x.id||("rm_"+Math.random().toString(36).slice(2,9))),title:String(x.title),note:String(x.note||""),ts:Number(x.ts)||Date.now(),steps:Array.isArray(x.steps)?x.steps.filter(function(s){return s&&s.text}).map(function(s){return{id:String(s.id||("st_"+Math.random().toString(36).slice(2,9))),text:String(s.text),done:!!s.done}}):[]}})}catch(e){roadmaps=[]}
+function rmSave(){try{localStorage.setItem(RMK,JSON.stringify(roadmaps));return true}catch(e){toast("تعذر حفظ خطة الدراسة");return false}}
+function mergeRoadmaps(list){if(!Array.isArray(list))return;list.forEach(function(item){if(!item||!item.title)return;var ex=roadmaps.find(function(r){return (item.id&&r.id===item.id)||r.title===item.title});if(!ex){roadmaps.push({id:String(item.id||("rm_"+Date.now()+"_"+Math.random().toString(36).slice(2,6))),title:String(item.title),note:String(item.note||""),ts:Number(item.ts)||Date.now(),steps:Array.isArray(item.steps)?item.steps.filter(function(s){return s&&s.text}).map(function(s){return{id:String(s.id||("st_"+Math.random().toString(36).slice(2,7))),text:String(s.text),done:!!s.done}}):[]});return}(Array.isArray(item.steps)?item.steps:[]).forEach(function(s){if(s&&s.text&&!ex.steps.some(function(z){return z.text===s.text}))ex.steps.push({id:String(s.id||("st_"+Math.random().toString(36).slice(2,7))),text:String(s.text),done:!!s.done})})});rmSave()}
+function rmDraw(){
+  var box=$("rmList");if(!box)return;
+  var list=roadmaps.filter(function(r){
+    var allDone=r.steps.length>0&&r.steps.every(function(s){return s.done});
+    if(rmFilterMode==="active")return !allDone;
+    if(rmFilterMode==="done")return allDone;
+    return true;
+  });
+  if(!list.length){box.innerHTML="<div class='card em'>"+(roadmaps.length?"لا توجد خطط مطابقة لهذا التصنيف.":"أضف أول خطة دراسة بالأعلى (مثل: لغة برمجة، مادة، مهارة) وقسّمها إلى مراحل.")+"</div>";return}
+  box.innerHTML=list.map(function(r){
+    var tot=r.steps.length,dn=r.steps.filter(function(s){return s.done}).length,pct=tot?Math.round(dn*100/tot):0;
+    return "<div class='card' data-rm-card='"+esc(r.id)+"'><div class='row' style='justify-content:space-between;align-items:flex-start'><div><h2 style='margin:0'>"+esc(r.title)+"</h2>"+(r.note?"<p class='sub' style='margin:2px 0 0'>"+esc(r.note)+"</p>":"")+"</div><div class='row' style='gap:6px'><span class='tag'>"+dn+" / "+tot+" ("+pct+"%)</span><button type='button' class='d' data-rm-del='"+esc(r.id)+"'>حذف</button></div></div><div class='rm-prog'><i style='width:"+pct+"%'></i></div><div>"+(tot?r.steps.map(function(s){return "<div class='rm-step"+(s.done?" done":"")+"'><input type='checkbox' "+(s.done?"checked":"")+" data-rm-tog='"+esc(r.id)+":"+esc(s.id)+"' aria-label='"+esc(s.text)+"'><span>"+esc(s.text)+"</span><button type='button' class='d' data-rm-sdel='"+esc(r.id)+":"+esc(s.id)+"' aria-label='حذف الخطوة'>✕</button></div>"}).join(""):"<div class='sub' style='font-size:.86rem;margin:6px 0'>لا توجد مراحل بعد — أضف أول خطوة بالأسفل.</div>")+"</div><div class='row' style='margin-top:10px'><input data-rm-in='"+esc(r.id)+"' placeholder='أضف مرحلة أو درس جديد...' aria-label='مرحلة جديدة' style='margin:0'><button type='button' class='g' data-rm-sadd='"+esc(r.id)+"'>إضافة</button></div></div>";
+  }).join("");
+}
+$("rmAdd").onclick=function(){
+  var title=$("rmTitle").value.trim(),note=$("rmNote").value.trim();
+  if(!title){toast("اكتب اسم خطة الدراسة أولاً");return}
+  roadmaps.unshift({id:"rm_"+Date.now()+"_"+Math.random().toString(36).slice(2,6),title:title,note:note,ts:Date.now(),steps:[]});
+  if(!rmSave()){roadmaps.shift();return}
+  $("rmTitle").value="";$("rmNote").value="";
+  hlog("roadmap","إضافة خطة دراسة",title);rmDraw();toast("تمت إضافة الخطة");
+};
+$("rmFilter").onclick=function(e){
+  var b=e.target.closest("button[data-f]");if(!b)return;
+  rmFilterMode=b.getAttribute("data-f");
+  [].forEach.call($("rmFilter").children,function(x){x.classList.toggle("on",x===b)});
+  rmDraw();
+};
+$("rmList").onclick=function(e){
+  var del=e.target.closest("[data-rm-del]");
+  if(del){
+    var id=del.getAttribute("data-rm-del");
+    if(del.getAttribute("data-confirm")){
+      var idx=roadmaps.findIndex(function(r){return r.id===id});
+      if(idx>-1){var rem=roadmaps.splice(idx,1)[0];if(!rmSave()){roadmaps.splice(idx,0,rem);return}hlog("roadmap","حذف خطة دراسة",rem.title);rmDraw();toast("تم حذف الخطة")}
+    }else{del.setAttribute("data-confirm","1");del.textContent="تأكيد؟";setTimeout(function(){if(del.parentNode){del.removeAttribute("data-confirm");del.textContent="حذف"}},3000)}
+    return;
+  }
+  var sadd=e.target.closest("[data-rm-sadd]");
+  if(sadd){
+    var rid=sadd.getAttribute("data-rm-sadd"),inp=$("rmList").querySelector('[data-rm-in="'+rid+'"]'),txt=inp?inp.value.trim():"";
+    if(!txt){toast("اكتب اسم المرحلة أولاً");return}
+    var rm=roadmaps.find(function(r){return r.id===rid});if(!rm)return;
+    rm.steps.push({id:"st_"+Date.now()+"_"+Math.random().toString(36).slice(2,6),text:txt,done:false});
+    if(!rmSave()){rm.steps.pop();return}
+    rmDraw();toast("تمت إضافة المرحلة");return;
+  }
+  var sdel=e.target.closest("[data-rm-sdel]");
+  if(sdel){
+    var parts=sdel.getAttribute("data-rm-sdel").split(":"),rm2=roadmaps.find(function(r){return r.id===parts[0]});if(!rm2)return;
+    var si=rm2.steps.findIndex(function(s){return s.id===parts[1]});
+    if(si>-1){var old=rm2.steps.splice(si,1)[0];if(!rmSave()){rm2.steps.splice(si,0,old);return}rmDraw()}
+  }
+};
+$("rmList").onchange=function(e){
+  var cb=e.target.closest("[data-rm-tog]");if(!cb)return;
+  var parts=cb.getAttribute("data-rm-tog").split(":"),rm=roadmaps.find(function(r){return r.id===parts[0]});if(!rm)return;
+  var st=rm.steps.find(function(s){return s.id===parts[1]});if(!st)return;
+  st.done=!!cb.checked;if(!rmSave()){st.done=!st.done;cb.checked=st.done;return}
+  rmDraw();
+};
+$("rmList").onkeydown=function(e){
+  if(e.key!=="Enter")return;
+  var inp=e.target.closest("[data-rm-in]");if(!inp)return;
+  e.preventDefault();
+  var btn=$("rmList").querySelector('[data-rm-sadd="'+inp.getAttribute("data-rm-in")+'"]');
+  if(btn)btn.click();
+};
 document.addEventListener("keydown",function(e){if(e.key=="Escape")$("mn").style.display="none"});
 function handleAppBack(){
   if($("mn").style.display==="block"){$("mn").style.display="none";return true}

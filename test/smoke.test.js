@@ -30,7 +30,8 @@ test('calendar, recycle bin, history and backup UI are present', () => {
   }
   for (const page of ['cal', 'trash', 'hist']) {
     assert.match(html, new RegExp(`data-t=["']${page}["']`));
-    assert.match(html, new RegExp(`data-g=["']${page}["']`));
+    // reachable from the "more" menu or from a group tab
+    assert.match(html, new RegExp(`data-g=["']${page}["']|\\["${page}",`));
   }
 });
 
@@ -40,6 +41,65 @@ test('statistics editor validates edits and sends deleted records to trash', () 
   assert.match(html, /function openStatsEditor\(index\)/);
   assert.match(html, /شدة الشعور يجب أن تكون من 0 إلى 10/);
   assert.match(html, /addToTrash\("feeling",removed,removed\.s\)/);
+});
+
+test('statistics still show productivity when there are no emotion records', () => {
+  const match = html.match(/(function stats\(\)\{[\s\S]*?)\nvar EG=/);
+  assert.ok(match, 'expected statistics renderer');
+  const today = new Date();
+  const todayKey = [today.getFullYear(), today.getMonth(), today.getDate()].join('-');
+  const nodes = { sx: { innerHTML: '' }, sp: {} };
+  const context = {
+    rows: [],
+    sp: 7,
+    window: {
+      P: {
+        tasks: [{ done: Date.now() }],
+        arch: [],
+        pom: { [todayKey]: 2 },
+        moods: { [todayKey]: { m: 4 } },
+        habits: []
+      }
+    },
+    $: id => nodes[id],
+    emos: () => [],
+    emoSection: () => '',
+    esc: String,
+    hbx: () => '',
+    bp() {}
+  };
+
+  vm.runInNewContext(`${match[1]};stats();`, context);
+
+  assert.match(nodes.sx.innerHTML, /<b>0<\/b><span>تسجيل<\/span>/);
+  assert.match(nodes.sx.innerHTML, /<b>1<\/b><span>مهمة منجزة<\/span>/);
+  assert.match(nodes.sx.innerHTML, /<b>2<\/b><span>جلسة تركيز<\/span>/);
+  assert.match(nodes.sx.innerHTML, /<b>4\.0<\/b><span>متوسط المزاج \/5<\/span>/);
+});
+
+test('opening the statistics tab through app navigation renders its content', () => {
+  const entry = html.match(/(function onTabEnter\(t\)\{[^\n]*\})/);
+  const navigation = html.match(/(function go\(t\)\{[\s\S]*?)\n\$\("bn"\)\.onclick=/);
+  assert.ok(entry, 'expected shared tab-entry handler');
+  assert.ok(navigation, 'expected app navigation handler');
+  let rendered = false;
+  const section = { tagName: 'SECTION', classList: { toggle() {} } };
+  const context = {
+    $: id => id === 'c' ? section : { style: {} },
+    document: { querySelectorAll: () => [section] },
+    window: { scrollTo() {} },
+    location: { hash: '' },
+    sync() {},
+    cur: 'td',
+    bon: false,
+    rq() {}, tr() {}, hr() {}, pd() {}, bkn() {}, gr() {}, gstart() {}, gmStop() {},
+    wr() {}, rcv() {}, ndraw() {}, bstop() {}, stats() { rendered = true; },
+    draw() {}, hdraw() {}, drawCalendar() {}, drawTrash() {}, chatRender() {}
+  };
+
+  vm.runInNewContext(`${entry[1]};${navigation[1]};go("c");`, context);
+
+  assert.equal(rendered, true);
 });
 
 test('deletion confirmation uses a separate attribute from task checkbox IDs', () => {
@@ -55,6 +115,61 @@ test('all critical removed item types have restore handlers', () => {
   assert.match(html, /function purgeExpiredTrash\(\)/);
 });
 
+test('failed persistence keeps restored items in the recycle bin', () => {
+  const match = html.match(/function restoreTrashItem\(id\)\{[\s\S]*?\nfunction drawTrash/);
+  assert.ok(match, 'expected recycle-bin restore handler');
+  const restore = new vm.Script(`(${match[0].replace(/\nfunction drawTrash$/, '')})`);
+  const cases = [
+    { type: 'feeling', item: { ts: 1 }, field: 'rows', save: 'save' },
+    { type: 'note', item: { ts: 1 }, field: 'nts', save: 'nsv' },
+    { type: 'task', item: { t: 'task' }, field: 'tasks', save: 'pv' },
+    { type: 'habit', item: { n: 'habit' }, field: 'habits', save: 'pv' },
+    { type: 'goal', item: { t: 'goal' }, field: 'goals', save: 'pv' },
+    { type: 'goalStep', item: { goalTitle: 'goal', step: { s: 'step' } }, field: 'goals', save: 'pv' },
+    { type: 'category', item: 'custom', field: 'categories', save: 'category' }
+  ];
+
+  for (const scenario of cases) {
+    const entry = { id: 'trash-1', type: scenario.type, item: scenario.item };
+    const context = {
+      trashItems: [entry],
+      rows: [],
+      nts: [],
+      P: { tasks: [], habits: [], goals: [] },
+      CT: [],
+      CK: 'categories',
+      localStorage: { setItem() { throw new Error('storage full'); } },
+      save() { return scenario.save !== 'save'; },
+      nsv() { return scenario.save !== 'nsv'; },
+      pv() { return scenario.save !== 'pv'; },
+      draw() {},
+      ndraw() {},
+      tr() {},
+      hr() {},
+      gr() {},
+      rcat() {},
+      freshId() { return 'new-id'; },
+      persistTrash() {},
+      hlog() {},
+      drawTrash() {},
+      toast() {}
+    };
+    const restoreItem = restore.runInNewContext(context);
+
+    restoreItem(entry.id);
+
+    assert.equal(context.trashItems.length, 1, `${scenario.type} should remain in trash`);
+    if (scenario.field === 'categories') {
+      assert.deepEqual(context.CT, []);
+    } else {
+      const target = scenario.field === 'rows' || scenario.field === 'nts'
+        ? context[scenario.field]
+        : context.P[scenario.field];
+      assert.deepEqual(target, [], `${scenario.type} should be rolled back`);
+    }
+  }
+});
+
 test('PWA icon files and Capacitor web build configuration exist', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
   for (const icon of manifest.icons) {
@@ -64,6 +179,10 @@ test('PWA icon files and Capacitor web build configuration exist', () => {
   assert.equal(cap.webDir, 'www');
   assert.ok(fs.existsSync(path.join(root, 'scripts', 'prepare-web.js')));
   assert.ok(fs.existsSync(path.join(root, '.github', 'workflows', 'build-apk.yml')));
+  const androidWorkflow = fs.readFileSync(path.join(root, '.github', 'workflows', 'build-android.yml'), 'utf8');
+  assert.match(androidWorkflow, /npx capacitor-assets generate --android/);
+  const packageJson = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+  assert.match(packageJson.scripts['android:build'], /capacitor-assets generate --android/);
 });
 
 test('encrypted backup crypto settings support authenticated round-trip', async () => {
@@ -92,4 +211,14 @@ test('encrypted backup crypto settings support authenticated round-trip', async 
     ['decrypt']
   );
   await assert.rejects(subtle.decrypt({ name: 'AES-GCM', iv }, wrongKey, encrypted));
+});
+
+test('chat related-message search splits on whitespace and bounds AI payloads', () => {
+  assert.match(html, /\.split\(\/\[\\s،,\.!\?؟؛:\]\+\/\)/);
+  assert.match(html, /function chatFitPayload\(list\)/);
+  assert.match(html, /var txt=\$\("wx"\)\.value\.trim\(\);if\(!txt\)/);
+  assert.match(html, /hlog\("note","إضافة",wty\+": "\+txt\.slice\(0,50\)/);
+  for (const id of ['chatStatusPill', 'chatSettingsPanel', 'chatSearchPanel', 'chatErrorBar', 'chatRememberToken']) {
+    assert.match(html, new RegExp(`id=["']${id}["']`));
+  }
 });

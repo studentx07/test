@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - feature/sakina-companion-memory
+      - fix/sakina-data-stability
     paths:
       - 'index.html'
       - 'manifest.json'
@@ -16,6 +17,7 @@ on:
       - 'package.json'
       - 'scripts/**'
       - 'assets/**'
+      - 'test/**'
       - '.github/workflows/build-android.yml'
 
 permissions:
@@ -40,8 +42,35 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Configure Gradle Maven mirror
+        run: |
+          mkdir -p ~/.gradle/init.d
+          cat << 'EOF' > ~/.gradle/init.d/maven-mirror.gradle
+          def prependMirror = { repos ->
+              def mirror = repos.maven { url = "https://maven-central.storage-download.googleapis.com/maven2/" }
+              repos.remove(mirror)
+              repos.add(0, mirror)
+          }
+          gradle.settingsEvaluated { settings ->
+              prependMirror(settings.pluginManagement.repositories)
+              prependMirror(settings.dependencyResolutionManagement.repositories)
+          }
+          allprojects {
+              buildscript {
+                  prependMirror(repositories)
+              }
+              prependMirror(repositories)
+          }
+          EOF
+
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+
+      - name: Run regression tests
+        run: npm test
 
       - name: Prepare web assets
         run: npm run prepare:web
@@ -51,6 +80,9 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Generate app assets
+        run: npx capacitor-assets generate --android
 
       - name: Build debug APK
         working-directory: android
